@@ -1,0 +1,3 @@
+#!/bin/bash
+# Can supply additional arguments, e.g. ./start_server --debug
+voila Antidiscrimination.ipynb --port=8867 --no-browser --show_tracebacks=True "$@"
