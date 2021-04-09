@@ -1,3 +1,7 @@
+import numpy as np
+import scipy.stats as st
+import pylab as pl
+
 # def binomial_discrimination(n=9, ra=3,rbar=4):
 '''
 Code to supplement Objective Assessment of University Discrimination -
@@ -27,31 +31,30 @@ ra =3; #13 actual appointments were observed
 
 
 #
-f = rbar./n;
-r = 0:n; #sampling
-y = binopdf(r,n,f); #binomial distn
+f = rbar/n;
+r = np.arange(n+1); #sampling
+y = st.binom.binopdf(r,n,f); #binomial distn #FIX
 k = f*n;
 
 #Calculation of the preference ratio
 #(n-ra)./(n-rbar) - ratio for other group
 #ra./rbar - ratio for relative proportion
-B = ((n-ra)./(n-rbar))./(ra./rbar);
+B = ((n-ra)/(n-rbar))/(ra/rbar);
 
 
 ## First figure binomial distribution of expected appointments
-subplot(2,1,1)
+pl.subplot(2,1,1)
 
-plot(r,y,'k','LineWidth',2.5);
-hold on
-xlim([0 n]);
-ylabel('P_F(r)')
-xlabel('r')
+pl.plot(r,y,'k','LineWidth',2.5);
+pl.xlim([0,n]);
+pl.ylabel('P_F(r)')
+pl.xlabel('r')
 
-handle = gca;
+handle = pl.gca();
 handle.XMinorTick = 'on';
 handle.YMinorTick = 'on';
 handle.TickDir = 'out';
-handle.TickLength = [.02 .02];
+handle.TickLength = [.02, .02];
 handle.Box = 'off';
 handle.Color = 'none';
 handle.FontSize = 14;
@@ -59,45 +62,40 @@ handle.YGrid = 'on';
 
 ## Calc cdf
 
-plot([ra ra], [0 y(r==ra)],'r','LineWidth',2.5)
+pl.plot([ra, ra], [0, y(r==ra)],'r','LineWidth',2.5)
 
-hold on
 
 #Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
 
-if ra <= k
-area(r(r<=ra),y((r<=ra)),'FaceColor','r')
-#ncdf = trapz(r(r<=ra),y((r<=ra))); #alternative calculation integral
-#under curve
-ncdf = sum(y((r<=ra)));
+if ra <= k:
+    pl.area(r(r<=ra),y((r<=ra)),'FaceColor','r')
+    #ncdf = trapz(r(r<=ra),y((r<=ra))); #alternative calculation integral
+    #under curve
+    ncdf = sum(y((r<=ra)));
+
+
+    ncdfround = round(ncdf,2,'significant');
+
+    pl.text(n/8+0.5,3*max(y)/4,['cdf(r_a) = ', str(ncdfround)],'Color','r','FontSize',14,'HorizontalAlignment','center')
+
+
+else:
+    pl.area(r(r>=ra),y((r>=ra)),'FaceColor','r')
+    #ncdf = trapz(r(r>=ra),y((r>=ra))); #alternative calculation integral
+    #under curve
+    ncdf = sum(y((r<=ra)));
 
 
 ncdfround = round(ncdf,2,'significant');
-
-text(n/8+0.5,3*max(y)/4,['cdf(r_a) = ' num2str(ncdfround)],'Color','r','FontSize',14,'HorizontalAlignment','center')
-
-
-else
-
-   area(r(r>=ra),y((r>=ra)),'FaceColor','r')
-#ncdf = trapz(r(r>=ra),y((r>=ra))); #alternative calculation integral
-#under curve
-ncdf = sum(y((r<=ra)));
-
-
-ncdfround = round(ncdf,2,'significant');
-text(3*n/4,3*max(y)/4,['cdf(r_a) = ' num2str(ncdfround)],'Color','r','FontSize',14,'HorizontalAlignment','center')
-
-
-end
+pl.text(3*n/4,3*max(y)/4,['cdf(r_a) = ', str(ncdfround)],'Color','r','FontSize',14,'HorizontalAlignment','center')
 
 #Save cdf for output
 cdfra = ncdfround;
 
 
 #Add vertical line and r_a
-plot([ra ra],[0.7*max(y)/4 0.7*max(y)/2],'r','LineWidth',2)
-text(ra, 0.9*max(y)/2,'r_a' ,'Color','r','FontSize',14,'HorizontalAlignment','center')
+pl.plot([ra, ra],[0.7*max(y)/4, 0.7*max(y)/2],'r','LineWidth',2)
+pl.text(ra, 0.9*max(y)/2,'r_a' ,'Color','r','FontSize',14,'HorizontalAlignment','center')
 
 
 
@@ -107,7 +105,7 @@ text(ra, 0.9*max(y)/2,'r_a' ,'Color','r','FontSize',14,'HorizontalAlignment','ce
 
 #Gaussian CI approximation
 bnpMean = n*f;
-bnpSTD = sqrt(n*f*(1-f));
+bnpSTD = np.sqrt(n*f*(1-f));
 
 
 #3 std 99.7# CI
@@ -120,46 +118,42 @@ hiBnd = bnpMean+2*bnpSTD;
 
 
 # Ceil the lower bound of CI -- Integer value of individuals
-lowBnd2 = ceil(lowBnd2);
-lowBnd = ceil(lowBnd);
+lowBnd2 = np.ceil(lowBnd2);
+lowBnd = np.ceil(lowBnd);
 
 # Floor the upper bound of CI -- Integer value of individuals
-hiBnd2 = floor(hiBnd2);
-hiBnd = floor(hiBnd);
+hiBnd2 = np.floor(hiBnd2);
+hiBnd = np.floor(hiBnd);
 
 # Catching for values over/under -- we cannot have negative individuals or
 # more than the population
-if lowBnd2 < 0
+if lowBnd2 < 0:
     lowBnd2 = 0;
-end
 
-if lowBnd < 0
+if lowBnd < 0:
     lowBnd = 0;
-end
 
-if hiBnd2 > n
+if hiBnd2 > n:
     hiBnd2 = n;
-end
 
-if hiBnd > n
+if hiBnd > n:
     hiBnd = n;
-end
 
 # Now plot the CI lines
 
-plot([lowBnd lowBnd], [0 y(r==lowBnd)],'b','LineWidth',2.5)
-plot([hiBnd hiBnd], [0 y(r==hiBnd)],'b','LineWidth',2.5)
+pl.plot([lowBnd, lowBnd], [0, y(r==lowBnd)],'b','LineWidth',2.5)
+pl.plot([hiBnd, hiBnd], [0, y(r==hiBnd)],'b','LineWidth',2.5)
 
-plot([lowBnd hiBnd], [1.1.*max(y) 1.1.*max(y)],'b','LineWidth',2.5)
-scatter(k, 1.1.*max(y), 70, 'b','filled')
-text(k,1.2.*max(y),'95# CI','Color','b','FontSize',14,'HorizontalAlignment','center')
+pl.plot([lowBnd, hiBnd], [1.1*max(y), 1.1*max(y)],'b','LineWidth',2.5)
+pl.scatter(k, 1.1*max(y), 70, 'b','filled')
+pl.text(k,1.2*max(y),'95# CI','Color','b','FontSize',14,'HorizontalAlignment','center')
 
 
 #text(0.025,0.95,'(a)','Units','normalized','FontSize',16)
-text(-0.15,1.15,'(a)','Units','normalized','FontSize',18)
+pl.text(-0.15,1.15,'(a)','Units','normalized','FontSize',18)
 
 
-CI = [lowBnd hiBnd];
+CI = [lowBnd, hiBnd];
 
 #Uncomment below for 99.7# CI
 # plot([lowBnd2 lowBnd2], [0 y(r==lowBnd2)],'r','LineWidth',2.5)
@@ -171,35 +165,34 @@ CI = [lowBnd hiBnd];
 ## Plot the unbiased ratio fig 1b
 #Inferred distribution of the numbers of appointments if the selectors made multiple new selections
 
-bigF = ra./n;
-r = 0:n; #sampling
-yunb = binopdf(r,n,bigF);
+bigF = ra/n;
+r = np.arange(n+1); #sampling
+yunb = st.binom.binopdf(r,n,bigF);
 
-subplot(2,1,2)
+pl.subplot(2,1,2)
 
-plot(r,yunb,'k','LineWidth',2.5);
-hold on
-xlim([0 n]);
-ylabel('P_S(R)')
-xlabel('R')
+pl.plot(r,yunb,'k','LineWidth',2.5);
+pl.xlim([0, n]);
+pl.ylabel('P_S(R)')
+pl.xlabel('R')
 
-handle = gca;
+handle = pl.gca();
 handle.XMinorTick = 'on';
 handle.YMinorTick = 'on';
 handle.TickDir = 'out';
-handle.TickLength = [.02 .02];
+handle.TickLength = [.02, .02];
 handle.Box = 'off';
 handle.Color = 'none';
 handle.FontSize = 14;
 handle.YGrid = 'on';
 
-text(-0.15,1.15,'(b)','Units','normalized','FontSize',18)
+pl.text(-0.15,1.15,'(b)','Units','normalized','FontSize',18)
 
 
 ## PLot 95# CI values of a resampled appointments
 
 bnpMean = n*bigF;
-bnpSTD = sqrt(n*bigF*(1-bigF));
+bnpSTD = np.sqrt(n*bigF*(1-bigF));
 
 #alp = 1-0.95/2;
 
@@ -220,17 +213,15 @@ hiBndR = round(hiBndR);
 #     lowBnd2 = 0;
 # end
 
-if lowBndR < 0
+if lowBndR < 0:
     lowBndR = 0;
-end
 
 # if hiBnd2 > n
 #     hiBnd2 = n;
 # end
 
-if hiBndR > n
+if hiBndR > n:
     hiBndR = n;
-end
 
 
 
@@ -238,37 +229,30 @@ end
 #plot([lowBnd lowBnd], [0 y(r==lowBnd)],'b','LineWidth',2.5)
 #plot([hiBnd hiBnd], [0 y(r==hiBnd)],'b','LineWidth',2.5)
 
-plot([lowBndR hiBndR], [1.1.*max(yunb) 1.1.*max(yunb)],'r','LineWidth',2.5)
+pl.plot([lowBndR, hiBndR], [1.1*max(yunb), 1.1*max(yunb)],'r','LineWidth',2.5)
 
-scatter(ra, 1.1.*max(yunb), 70, 'r','filled')
+pl.scatter(ra, 1.1*max(yunb), 70, 'r','filled')
 
-text(ra,1.2.*max(yunb),'95# CI','Color','r','FontSize',14,'HorizontalAlignment','center')
+pl.text(ra,1.2*max(yunb),'95# CI','Color','r','FontSize',14,'HorizontalAlignment','center')
 
 
-area(r(lowBnd+1:hiBnd+1),yunb(lowBnd+1:hiBnd+1),'FaceColor','b')
+pl.area(r[lowBnd+1:hiBnd+1],yunb[lowBnd+1:hiBnd+1],'FaceColor','b')
 
 
 #U = trapz(r(lowBnd+1:hiBnd+1),yunb(lowBnd+1:hiBnd+1)); #Calc U using
 #integration
 
 #As defined in the appendix
-U = sum(yunb(lowBnd+1:hiBnd+1));
+U = sum(yunb[lowBnd+1:hiBnd+1]);
 
 ## Add on PU text
 PUround = round(U,2,'significant');
 
-if ra < n/2
+if ra < n/2:
+    pl.text(5*n/8,3*max(yunb)/4,['U = ', str(PUround)],'Color','b','FontSize',14,'HorizontalAlignment','center')
 
-text(5*n/8,3*max(yunb)/4,['U = ' num2str(PUround)],'Color','b','FontSize',14,'HorizontalAlignment','center')
+else:
+    pl.text(n/4,3*max(yunb)/4,['U = ', str(PUround)],'Color','b','FontSize',14,'HorizontalAlignment','center')
 
-else
-
-text(n/4,3*max(yunb)/4,['U = ' num2str(PUround)],'Color','b','FontSize',14,'HorizontalAlignment','center')
-
-
-end
-
-
-end
 
 # return [CI,cdfra,B,U]
