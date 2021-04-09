@@ -1,6 +1,7 @@
 numpy
-matplotlib
+scipy
 sciris
+matplotlib
 jupyter
 jupyterlab
 jupyterhub
