@@ -1,0 +1,8 @@
+numpy
+matplotlib
+sciris
+jupyter
+jupyterlab
+jupyterhub
+ipympl
+voila
