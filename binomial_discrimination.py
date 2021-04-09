@@ -5,7 +5,7 @@ import pylab as pl
 
 pl.rc('figure', dpi=150)
 
-def binomial_discrimination(n=9, ra=3, rbar=4):
+def binomial_discrimination(n=9, ra=3, rbar=4, fig=None, interactive=True):
     '''
     Code to supplement Objective Assessment of University Discrimination -
     by Prof. P. A. Robinson, School of Physics, University of Sydney
@@ -59,13 +59,14 @@ def binomial_discrimination(n=9, ra=3, rbar=4):
 
 
     #%% Create the figure
-    fig = pl.figure(figsize=(8,6))
+    if fig is None:
+        fig = pl.figure(figsize=(8,6))
     pl.subplots_adjust(top=0.94, bottom=0.08, right=0.98, hspace=0.4)
     pl.figtext(0.02, 0.97, '(a)', fontsize=12)
     pl.figtext(0.02, 0.47, '(b)', fontsize=12)
 
     ## First figure binomial distribution of expected appointments
-    ax1 = pl.subplot(2,1,1)
+    pl.subplot(2,1,1)
     pl.plot(r, y, c='k', lw=1.5)
     pl.xlim([0, n])
     pl.ylabel(r'$P_F(r)$')
@@ -79,7 +80,7 @@ def binomial_discrimination(n=9, ra=3, rbar=4):
         rarea = r[r<=ra]
         yarea = y[r<=ra]
         xtext = n/8+0.5
-        ytext = 3*max(y)/4
+        ytext = 3.5*max(y)/4
     else:
         rarea = r[r>=ra]
         yarea = y[r>=ra]
@@ -213,9 +214,12 @@ def binomial_discrimination(n=9, ra=3, rbar=4):
     pl.minorticks_on()
     sc.boxoff()
     sc.setylim()
-    pl.show()
 
-    return [CI,cdfra,B,U]
+    if interactive:
+        pl.show()
+        return [CI,cdfra,B,U]
+    else:
+        return fig
 
 
 if __name__ == '__main__':
