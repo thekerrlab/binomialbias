@@ -1,3 +1,7 @@
+'''
+Test app
+'''
+
 from shiny import App, render, ui
 
 # Import modules for plot rendering
