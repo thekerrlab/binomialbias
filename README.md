@@ -1,6 +1,6 @@
 # Binomial Bias
 
-Code to compute quantitative assessments of discrimination within organizations, using the binomial distribution.
+Library to compute and plot quantitative assessments of discrimination within organizations, based on the binomial distribution.
 
 There are several ways to use this library, described below.
 

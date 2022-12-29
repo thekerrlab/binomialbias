@@ -1,2 +1,4 @@
 #!/bin/bash
-rsconnect deploy shiny . --name sciris --title "binomialbias"
+# Deploy the Python app to shinyapps.io
+
+rsconnect deploy shiny ./binomialbias --name sciris --title "binomialbias"
