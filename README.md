@@ -17,7 +17,7 @@ To use locally with Python, run
 This can then be used locally via e.g.:
 
     import binomialbias as bb
-    bb.plotbias(n=9, actual=3, expected=4)
+    bb.plot_bias(n=9, actual=3, expected=4)
 
 The PyShiny app can also be run locally via `shiny app.py`.
 
