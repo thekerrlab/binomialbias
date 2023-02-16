@@ -156,6 +156,8 @@ class BinomialBias(sc.prettyobj):
         self.results.high = hiBnd
         
         # Other things
+        self.x = x
+        self.pmf = pmf
         self.yunb = yunb
         self.PUround = PUround
         self.lowBndR = lowBndR
