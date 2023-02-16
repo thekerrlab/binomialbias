@@ -291,13 +291,11 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=10, actual=2, expected=3):
+def plot_bias(n=10, actual=3, expected=4):
     '''
     Script
     '''
     B = BinomialBias(n=n, actual=actual, expected=expected, plot=True)
-    # B.calculate()
-    # B.plot()
     return B
 
 
