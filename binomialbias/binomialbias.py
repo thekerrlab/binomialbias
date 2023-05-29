@@ -81,7 +81,7 @@ class BinomialBias(sc.prettyobj):
         bias = ((n-actual)/(n-expect))/(actual/expect)
         
         ncdf = sum(pmf[x<=actual])
-        ncdfround = sc.sigfig(ncdf, 2)
+        ncdfround = round(ncdf, 2)
         
         #Gaussian CI approximation
         bnpMean = n*eprop
@@ -119,12 +119,12 @@ class BinomialBias(sc.prettyobj):
         
         
         bnpMean = n*aprop
-        bnpSTD = np.sqrt(n*aprop*(1-aprop))
+        bnpSTD  = np.sqrt(n*aprop*(1-aprop))
     
         lowBndR = bnpMean-2*bnpSTD
-        hiBndR = bnpMean+2*bnpSTD
+        hiBndR  = bnpMean+2*bnpSTD
         lowBndR = round(lowBndR)
-        hiBndR = round(hiBndR)
+        hiBndR  = round(hiBndR)
     
         # Catching for values over/under
         if lowBndR < 0:
@@ -139,14 +139,20 @@ class BinomialBias(sc.prettyobj):
         PUround = sc.sigfig(U, 2) ## Add on PU text
         
         
-        
         # Assemble into a results object
         self.results = sc.objdict()
+        
+        # Store inputs
+        self.results.n = self.n
+        self.results.actual = self.actual
+        self.results.expected = self.expected
+        
+        # Store outputs
         self.results.cdf = ncdfround
         self.results.bias = bias
         self.results.fairness = U
-        self.results.low = lowBnd
-        self.results.high = hiBnd
+        self.results.expected_low = lowBnd
+        self.results.expected_high = hiBnd
         
         # Other things
         self.x = x
@@ -187,8 +193,8 @@ class BinomialBias(sc.prettyobj):
         
         # TEMP
         ncdfround = self.results.cdf
-        lowBnd = self.results.low
-        hiBnd = self.results.high
+        lowBnd = self.results.expected_low
+        hiBnd = self.results.expected_high
         yunb = self.yunb
         PUround = self.PUround
         lowBndR = self.lowBndR
