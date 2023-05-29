@@ -14,7 +14,7 @@ __all__ = ['BinomialBias', 'plot_bias']
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=10, actual=2, expected=5, display=True, plot=False):
+    def __init__(self, n=10, expected=5, actual=2, display=True, plot=False):
         '''
         Code to supplement Quantitative Assessment of University Discrimination -
         by Prof. P. A. Robinson, School of Physics, University of Sydney
@@ -22,8 +22,8 @@ class BinomialBias(sc.prettyobj):
     
         Args:
             n (int): The total number of appointments
-            actual (int/float): Actual number appointments of a group (either proportion or total number)
             expected (int/float): Expected appointments of a group given a fair process (either proportion or total number)
+            actual (int/float): Actual number appointments of a group (either proportion or total number)
             display (bool): whether to display the results
             plot (bool): whether to plot the results
     
@@ -69,23 +69,16 @@ class BinomialBias(sc.prettyobj):
         actual = self.actual
         expect = self.expected
         
+        x     = np.arange(n+1) # X-axis: all possible samples
         eprop = expect/n # Expected proportion of target group
-        aprop = actual/n
-        x = np.arange(n+1) # X-axis: all possible samples
-        pmf = st.binom.pmf(x, n, eprop) # Binomial distribution
-        yunb = st.binom.pmf(x, n, aprop)
+        aprop = actual/n # Actual proportion of target group
+        pmf   = st.binom.pmf(x, n, eprop) # Binomial distribution
+        yunb  = st.binom.pmf(x, n, aprop)
     
         # Calculation of the preference ratio
         # (n-actual)/(n-expected) - ratio for other group
         # actual/expected - ratio for relative proportion
         bias = ((n-actual)/(n-expect))/(actual/expect)
-        
-        # Shorten variables
-        # x  = self.x
-        # pmf  = self.pmf
-        # ra = self.actual
-        # k  = self.expected
-        # f  = self.eprop
         
         ncdf = sum(pmf[x<=actual])
         ncdfround = sc.sigfig(ncdf, 2)
@@ -291,11 +284,11 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=10, actual=3, expected=4):
+def plot_bias(n=10, expected=4, actual=3):
     '''
     Script
     '''
-    B = BinomialBias(n=n, actual=actual, expected=expected, plot=True)
+    B = BinomialBias(n=n, expected=expected, actual=actual, plot=True)
     return B
 
 
