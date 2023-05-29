@@ -16,6 +16,10 @@ class BinomialBias(sc.prettyobj):
     
     def __init__(self, n=10, expected=5, actual=2, display=True, plot=False):
         '''
+        
+        ### UPDATE DOCSTRING!!!!
+        
+        
         Code to supplement Quantitative Assessment of University Discrimination -
         by Prof. P. A. Robinson, School of Physics, University of Sydney
         Python conversion by Dr. C. C. Kerr, Institute for Disease Modeling
@@ -26,7 +30,7 @@ class BinomialBias(sc.prettyobj):
             actual (int/float): Actual number appointments of a group (either proportion or total number)
             display (bool): whether to display the results
             plot (bool): whether to plot the results
-    
+            
         Results are stored in "results", which has the following fields:
             ci: 95% confidence interval for individuals given a fair process
             cdf: Cumulative distribution function of ra or less appointments
@@ -72,71 +76,35 @@ class BinomialBias(sc.prettyobj):
         x     = np.arange(n+1) # X-axis: all possible samples
         eprop = expect/n # Expected proportion of target group
         aprop = actual/n # Actual proportion of target group
-        pmf   = st.binom.pmf(x, n, eprop) # Binomial distribution
-        yunb  = st.binom.pmf(x, n, aprop)
+        e_pmf = st.binom.pmf(x, n, eprop) # Binomial distribution
+        a_pmf = st.binom.pmf(x, n, aprop)
     
         # Calculation of the preference ratio
         # (n-actual)/(n-expected) - ratio for other group
         # actual/expected - ratio for relative proportion
         bias = ((n-actual)/(n-expect))/(actual/expect)
-        
-        ncdf = sum(pmf[x<=actual])
+        ncdf = sum(e_pmf[x<=actual])
         ncdfround = round(ncdf, 2)
         
-        #Gaussian CI approximation
-        bnpMean = n*eprop
-        bnpSTD = np.sqrt(n*eprop*(1-eprop))
+        # Gaussian CI approximation
+        e_mean = n*eprop
+        e_std = np.sqrt(e_mean*(1-eprop))
+
+        # Calculate bounds
+        e_low  = int(max(0, np.ceil(e_mean-2*e_std)))
+        e_high = int(min(n, np.floor(e_mean+2*e_std)))
+
+        ## Actual
+        a_mean = n*aprop
+        a_std  = np.sqrt(a_mean*(1-aprop))
+
+        # Calculate bounds
+        a_low  = int(max(0, np.ceil(a_mean-2*a_std)))
+        a_high = int(min(n, np.floor(a_mean+2*a_std)))
     
-        #3 std 99.7# CI
-        lowBnd2 = bnpMean-3*bnpSTD
-        hiBnd2 = bnpMean+3*bnpSTD
-    
-        #2 std or 95% CI
-        lowBnd = bnpMean-2*bnpSTD
-        hiBnd = bnpMean+2*bnpSTD
-    
-        # Ceil the lower bound of CI -- Integer value of individuals
-        lowBnd2 = np.ceil(lowBnd2)
-        lowBnd = np.ceil(lowBnd)
-    
-        # Floor the upper bound of CI -- Integer value of individuals
-        hiBnd2 = np.floor(hiBnd2)
-        hiBnd = np.floor(hiBnd)
-    
-        # Catching for values over/under -- we cannot have negative individuals or
-        # more than the population
-        if lowBnd2 < 0:
-            lowBnd2 = 0
-    
-        if lowBnd < 0:
-            lowBnd = 0
-    
-        if hiBnd2 > n:
-            hiBnd2 = n
-    
-        if hiBnd > n:
-            hiBnd = n
-        
-        
-        bnpMean = n*aprop
-        bnpSTD  = np.sqrt(n*aprop*(1-aprop))
-    
-        lowBndR = bnpMean-2*bnpSTD
-        hiBndR  = bnpMean+2*bnpSTD
-        lowBndR = round(lowBndR)
-        hiBndR  = round(hiBndR)
-    
-        # Catching for values over/under
-        if lowBndR < 0:
-            lowBndR = 0
-    
-        if hiBndR > n:
-            hiBndR = n
-        
-        lowBnd = int(lowBnd)
-        hiBnd = int(hiBnd)
-        U = sum(yunb[lowBnd:hiBnd+1])
-        PUround = sc.sigfig(U, 2) ## Add on PU text
+        # Calculate fairness
+        fairness = sum(a_pmf[a_low:a_high+1])
+        fair_round = round(fairness, 2) ## Add on PU text
         
         
         # Assemble into a results object
@@ -148,19 +116,21 @@ class BinomialBias(sc.prettyobj):
         self.results.expected = self.expected
         
         # Store outputs
-        self.results.cdf = ncdfround
+        self.results.cumprob = ncdfround
         self.results.bias = bias
-        self.results.fairness = U
-        self.results.expected_low = lowBnd
-        self.results.expected_high = hiBnd
+        self.results.fairness = fairness
+        self.results.expected_low = e_low
+        self.results.expected_high = e_high
         
-        # Other things
-        self.x = x
-        self.pmf = pmf
-        self.yunb = yunb
-        self.PUround = PUround
-        self.lowBndR = lowBndR
-        self.hiBndR = hiBndR
+        # Other things, used for plotting
+        pr = sc.objdict()
+        pr.x = x
+        pr.e_pmf = e_pmf
+        pr.a_pmf = a_pmf
+        pr.fair_round  = fair_round
+        pr.actual_low  = a_low
+        pr.actual_high = a_high
+        self.plot_results = pr
         
         return self.results
     
@@ -171,34 +141,39 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, fig=None):
+    def plot(self, fig=None, color1='r', color2='b'):
         '''
         Plot the results of the bias calculation
         '''
         
         def marea(x, y, fc='r', **kwargs):
+            ''' Settings to replicate an area plot in Matlab '''
             return pl.fill_between(x, y1=y, y2=0, facecolor=fc, zorder=10, **kwargs)
     
     
-        def mplot(x, y, *args, **kwargs):
+        def mplot(x, y, **kwargs):
+            ''' Settings to replicate a line plot in Matlab '''
             return pl.plot(x, y, zorder=20, **kwargs)
         
+        # Shorten variables into a data dict
+        d = sc.mergedicts(self.results, self.plot_results)
+        
         # Shorten variables
-        n  = self.n
-        r  = self.x
-        y  = self.pmf
-        ra = self.actual
-        k  = self.expected
+        # n  = self.n
+        # r  = self.x
+        # y  = self.pmf
+        # ra = self.actual
+        # k  = self.expected
         # f  = self.eprop
         
         # TEMP
-        ncdfround = self.results.cdf
-        lowBnd = self.results.expected_low
-        hiBnd = self.results.expected_high
-        yunb = self.yunb
-        PUround = self.PUround
-        lowBndR = self.lowBndR
-        hiBndR = self.hiBndR
+        # ncdfround = self.results.cdf
+        # lowBnd = self.results.expected_low
+        # hiBnd = self.results.expected_high
+        # yunb = self.yunb
+        # PUround = self.PUround
+        # lowBndR = self.lowBndR
+        # hiBndR = self.hiBndR
         
     
         
@@ -210,46 +185,46 @@ class BinomialBias(sc.prettyobj):
         pl.figtext(0.02, 0.97, '(a)', fontsize=12)
         pl.figtext(0.02, 0.47, '(b)', fontsize=12)
     
-        ## First figure binomial distribution of expected appointments
+        ## First figure: binomial distribution of expected appointments
         pl.subplot(2,1,1)
-        pl.plot(self.x, self.pmf, c='k', lw=1.5)
-        pl.xlim([0, self.n])
+        pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
+        pl.xlim([0, d.n])
         pl.ylabel(r'$P_F(r)$') # FIX
         pl.xlabel('r') # FIX
     
         ## Calculate cdf
-        mplot([ra, ra], [0, y[r==ra][0]], c='r', lw=2.0)
+        mplot([d.actual, d.actual], [0, d.e_pmf[d.x==d.actual][0]], c=color1, lw=2.0)
     
         #Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
-        if ra <= k:
-            rarea = r[r<=ra]
-            yarea = y[r<=ra]
-            xtext = n/8+0.5
-            ytext = 3.5*max(y)/4
+        if d.actual <= d.expected:
+            rarea = d.x[d.x<=d.actual]
+            yarea = d.e_pmf[d.x<=d.actual]
+            xtext = d.n/8+0.5
+            ytext = 3.5*max(d.e_pmf)/4
         else:
-            rarea = r[r>=ra]
-            yarea = y[r>=ra]
-            xtext = 3*n/4
-            ytext = 3*max(y)/4
+            rarea = d.x[d.x>=d.actual]
+            yarea = d.e_pmf[d.x>=d.actual]
+            xtext = 3*d.n/4
+            ytext = 3*max(d.e_pmf)/4
     
-        marea(rarea, yarea, 'r')
-        pl.text(xtext, ytext, f'$cdf(r_a)$ = {ncdfround}', c='r', horizontalalignment='center')
+        marea(rarea, yarea, color1)
+        pl.text(xtext, ytext, f'$cdf(r_a)$ = {d.cumprob}', c=color1, horizontalalignment='center')
     
         #Add vertical line and r_a
-        pl.plot([ra, ra],[0.7*max(y)/4, 0.7*max(y)/2], c='r', lw=1.0)
-        pl.text(ra+0.2, 0.9*max(y)/2,'$r_a$' , c='r', horizontalalignment='center')
+        pl.plot([d.actual, d.actual],[0.7*max(d.e_pmf)/4, 0.7*max(d.e_pmf)/2], c=color1, lw=1.0)
+        pl.text(d.actual+0.2, 0.9*max(d.e_pmf)/2,'$r_a$' , c=color1, horizontalalignment='center')
     
     
         ## Plot 95% CI  values
     
         # Now plot the CI lines
     
-        mplot([lowBnd, lowBnd], [0, y[r==lowBnd][0]],c='b',lw=2.0)
-        mplot([hiBnd, hiBnd], [0, y[r==hiBnd][0]],c='b',lw=2.0)
+        mplot([d.expected_low, d.expected_low], [0, d.e_pmf[d.x==d.expected_low][0]],c=color2,lw=2.0)
+        mplot([d.expected_high, d.expected_high], [0, d.e_pmf[d.x==d.expected_high][0]],c=color2,lw=2.0)
     
-        mplot([lowBnd, hiBnd], [1.1*max(y), 1.1*max(y)],c='b',lw=2.0)
-        pl.scatter(k, 1.1*max(y), 70, c='b')
-        pl.text(k, 1.2*max(y),'95% CI', c='b', horizontalalignment='center')
+        mplot([d.expected_low, d.expected_high], [1.1*max(d.e_pmf), 1.1*max(d.e_pmf)],c=color2,lw=2.0)
+        pl.scatter(d.expected, 1.1*max(d.e_pmf), 70, c=color2)
+        pl.text(d.expected, 1.2*max(d.e_pmf),'95% CI', c=color2, horizontalalignment='center')
     
         pl.grid(True, axis='y')
         pl.minorticks_on()
@@ -257,30 +232,30 @@ class BinomialBias(sc.prettyobj):
         sc.setylim()
     
         # bigF = ra/n
-        r = np.arange(n+1) #sampling
+        #r = np.arange(n+1) #sampling
         
     
         pl.subplot(2,1,2)
     
-        mplot(r,yunb,c='k',lw=1.5)
-        pl.xlim([0, n])
+        mplot(d.x,d.a_pmf,c='k',lw=1.5)
+        pl.xlim([0, d.n])
         pl.ylabel('$P_S(R)$')
         pl.xlabel('R')
     
         ## Plot 95% CI values of a resampled appointments
     
-        mplot([lowBndR, hiBndR], [1.1*max(yunb), 1.1*max(yunb)],c='r',lw=2.0)
-        pl.scatter(ra, 1.1*max(yunb), 70, c='r')
-        pl.text(ra,1.2*max(yunb),'95% CI',c='r',horizontalalignment='center')
+        mplot([d.actual_low, d.actual_high], [1.1*max(d.a_pmf), 1.1*max(d.a_pmf)],c=color1,lw=2.0)
+        pl.scatter(d.actual, 1.1*max(d.a_pmf), 70, c=color1)
+        pl.text(d.actual,1.2*max(d.a_pmf),'95% CI',c=color1,horizontalalignment='center')
     
-        marea(r[lowBnd:hiBnd+1], yunb[lowBnd:hiBnd+1], 'b')
+        marea(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], color2)
     
         #U = trapz(r(lowBnd+1:hiBnd+1),yunb(lowBnd+1:hiBnd+1)) #Calc U using integration # As defined in the appendix
     
-        if ra < n/2:
-            pl.text(5*n/8, 3*max(yunb)/4,f'U = {PUround}',c='b',horizontalalignment='center')
+        if d.actual < d.n/2:
+            pl.text(5*d.n/8, 3*max(d.a_pmf)/4,f'U = {d.fair_round}',c=color2,horizontalalignment='center')
         else:
-            pl.text(n/4, 3*max(yunb)/4,f'U = {PUround}',c='b',horizontalalignment='center')
+            pl.text(d.n/4, 3*max(d.a_pmf)/4,f'U = {d.fair_round}',c=color2,horizontalalignment='center')
     
         pl.grid(True, axis='y')
         pl.minorticks_on()
