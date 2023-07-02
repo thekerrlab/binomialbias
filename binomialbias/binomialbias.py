@@ -84,7 +84,6 @@ class BinomialBias(sc.prettyobj):
         # actual/expected - ratio for relative proportion
         bias = ((n-actual)/(n-expect))/(actual/expect)
         ncdf = sum(e_pmf[x<=actual])
-        ncdfround = round(ncdf, 2)
         
         # Gaussian CI approximation
         e_mean = n*eprop
@@ -142,7 +141,7 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, fig=None, color1='r', color2='b'):
+    def plot(self, fig=None, color0='lightblue', color1='darkblue', color2='forestgreen'):
         '''
         Plot the results of the bias calculation
         '''
@@ -155,9 +154,15 @@ class BinomialBias(sc.prettyobj):
         def mplot(x, y, **kwargs):
             ''' Settings to replicate a line plot in Matlab '''
             return pl.plot(x, y, zorder=20, **kwargs)
+    
+        def mbar(x, y, **kwargs):
+            ''' Settings to replicate a line plot in Matlab '''
+            kwargs['facecolor'] = kwargs.pop('c', None)
+            return pl.bar(x, y, zorder=20, **kwargs)
         
         # Shorten variables into a data dict
         d = sc.mergedicts(self.results, self.plot_results)
+        barkw = dict(width=0.95, alpha=0.7)
         
 
         #%% Create the figure
@@ -169,7 +174,8 @@ class BinomialBias(sc.prettyobj):
     
         ## First figure: binomial distribution of expected appointments
         pl.subplot(2,1,1)
-        pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
+        pl.bar(d.x, d.e_pmf, facecolor=color0, **barkw)
+        # pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Actual vs. expected appointments')
@@ -192,8 +198,9 @@ class BinomialBias(sc.prettyobj):
             xtext = 3*d.n/4
             ytext = 3*e_max/4
     
-        marea(rarea, yarea, color1)
-        pl.text(xtext, ytext, f'$cdf(r_a)$ = {d.cumprob}', c=color1, horizontalalignment='center')
+        # marea(rarea, yarea, color1)
+        pl.bar(rarea, yarea, facecolor=color1, **barkw)
+        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.2f}', c=color1, horizontalalignment='center')
     
         #Add vertical line and r_a
         pl.plot([d.actual, d.actual],[0.7*e_max/4, 0.7*e_max/2], c=color1, lw=1.0)
