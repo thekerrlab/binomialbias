@@ -103,7 +103,7 @@ class BinomialBias(sc.prettyobj):
     
         # Calculate fairness
         fairness = sum(a_pmf[a_low:a_high+1])
-        fair_round = round(fairness, 2) ## Add on PU text
+        # fair_round = round(fairness, 2) ## Add on PU text
         
         
         # Assemble into a results object
@@ -127,7 +127,7 @@ class BinomialBias(sc.prettyobj):
         pr.x = x
         pr.e_pmf = e_pmf
         pr.a_pmf = a_pmf
-        pr.fair_round  = fair_round
+        # pr.fair_round  = fair_round
         pr.actual_low  = a_low
         pr.actual_high = a_high
         self.plot_results = pr
@@ -141,7 +141,7 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, fig=None, color0='lightblue', color1='darkblue', color2='forestgreen'):
+    def plot(self, fig=None, dist_color='lightblue', cdf_color='darkblue', ci_color='k'):
         '''
         Plot the results of the bias calculation
         '''
@@ -169,19 +169,19 @@ class BinomialBias(sc.prettyobj):
         if fig is None:
             fig = pl.figure(figsize=(8,6))
         pl.subplots_adjust(top=0.94, bottom=0.08, right=0.98, hspace=0.4)
-        pl.figtext(0.02, 0.97, '(a)', fontsize=12)
-        pl.figtext(0.02, 0.47, '(b)', fontsize=12)
+        # pl.figtext(0.02, 0.97, '(a)', fontsize=12)
+        # pl.figtext(0.02, 0.47, '(b)', fontsize=12)
     
         ## First figure: binomial distribution of expected appointments
         pl.subplot(2,1,1)
-        pl.bar(d.x, d.e_pmf, facecolor=color0, **barkw)
+        pl.bar(d.x, d.e_pmf, facecolor=dist_color, **barkw)
         # pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Actual vs. expected appointments')
     
         ## Calculate cdf
-        mplot([d.actual, d.actual], [0, d.e_pmf[d.x==d.actual][0]], c=color1, lw=2.0)
+        mplot([d.actual, d.actual], [0, d.e_pmf[d.x==d.actual][0]], c=cdf_color, lw=2.0)
     
         #Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
         e_max = max(d.e_pmf)
@@ -198,24 +198,24 @@ class BinomialBias(sc.prettyobj):
             xtext = 3*d.n/4
             ytext = 3*e_max/4
     
-        # marea(rarea, yarea, color1)
-        pl.bar(rarea, yarea, facecolor=color1, **barkw)
-        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.2f}', c=color1, horizontalalignment='center')
+        # marea(rarea, yarea, cdf_color)
+        pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
+        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.2f}', c=cdf_color, horizontalalignment='center')
     
         #Add vertical line and r_a
-        pl.plot([d.actual, d.actual],[0.7*e_max/4, 0.7*e_max/2], c=color1, lw=1.0)
-        pl.text(d.actual+0.2, 0.9*e_max/2,'$r_a$', c=color1, horizontalalignment='center')
+        pl.plot([d.actual, d.actual],[0.7*e_max/4, 0.7*e_max/2], c=cdf_color, lw=1.0)
+        pl.text(d.actual+0.2, 0.9*e_max/2,'$r_a$', c=cdf_color, horizontalalignment='center')
     
     
         ## Plot 95% CI  values
-        mplot([d.expected_low, d.expected_low], [0, d.e_pmf[d.x==d.expected_low][0]],c=color2,lw=2.0)
-        mplot([d.expected_high, d.expected_high], [0, d.e_pmf[d.x==d.expected_high][0]],c=color2,lw=2.0)
+        mplot([d.expected_low, d.expected_low], [0, d.e_pmf[d.x==d.expected_low][0]],c=ci_color,lw=2.0)
+        mplot([d.expected_high, d.expected_high], [0, d.e_pmf[d.x==d.expected_high][0]],c=ci_color,lw=2.0)
     
-        mplot([d.expected_low, d.expected_high], [1.1*e_max, 1.1*e_max],c=color2,lw=2.0)
-        pl.scatter(d.expected, 1.1*e_max, 70, c=color2)
-        pl.text(d.expected, 1.2*e_max,'95% CI', c=color2, horizontalalignment='center')
+        mplot([d.expected_low, d.expected_high], [1.1*e_max, 1.1*e_max],c=ci_color,lw=2.0)
+        pl.scatter(d.expected, 1.1*e_max, 70, c=ci_color)
+        pl.text(d.expected, 1.2*e_max,'95% CI', c=ci_color, horizontalalignment='center')
     
-        pl.grid(True, axis='y')
+        # pl.grid(True, axis='y')
         pl.minorticks_on()
         sc.boxoff()
         sc.setylim()
@@ -224,24 +224,26 @@ class BinomialBias(sc.prettyobj):
         ## Second plot: if we kept sampling from this distribution    
         pl.subplot(2,1,2)
     
-        mplot(d.x,d.a_pmf,c='k',lw=1.5)
+        pl.bar(d.x, d.a_pmf, facecolor=dist_color, **barkw)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Expected distribution of additional appointments')
     
-        mplot([d.actual_low, d.actual_high], [1.1*a_max, 1.1*a_max],c=color1,lw=2.0)
-        pl.scatter(d.actual, 1.1*a_max, 70, c=color1)
-        pl.text(d.actual,1.2*a_max,'95% CI',c=color1,horizontalalignment='center')
+        mplot([d.actual_low, d.actual_high], [1.1*a_max, 1.1*a_max], c=ci_color,lw=2.0)
+        pl.scatter(d.actual, 1.1*a_max, 70, c=ci_color)
+        pl.text(d.actual, 1.2*a_max,'95% CI', c=ci_color,horizontalalignment='center')
     
-        marea(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], color2)
+        pl.bar(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], facecolor=cdf_color, **barkw)
     
         if d.actual < d.n/2:
-            pl.text(5*d.n/8, 3*a_max/4,f'U = {d.fair_round}',c=color2,horizontalalignment='center')
+            fairx = 5*d.n/8
         else:
-            pl.text(d.n/4, 3*a_max/4,f'U = {d.fair_round}',c=color2,horizontalalignment='center')
+            fairx = d.n/4
+        fairstr = '$P_{fair}$'
+        pl.text(fairx, 3*a_max/4,f'{fairstr} = {d.fairness:0.2f}', c=cdf_color, horizontalalignment='center')
     
-        pl.grid(True, axis='y')
-        pl.minorticks_on()
+        # pl.grid(True, axis='y')
+        # pl.minorticks_on()
         sc.boxoff()
         sc.setylim()
         
@@ -252,9 +254,11 @@ def plot_bias(n=10, expected=5, actual=6):
     '''
     Script
     '''
-    B = BinomialBias(n=n, expected=expected, actual=actual, plot=True)
-    return B
+    B = BinomialBias(n=n, expected=expected, actual=actual)
+    fig = B.plot()
+    return fig
 
 
 if __name__ == '__main__':
     B = plot_bias()
+    pl.show()
