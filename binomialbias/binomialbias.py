@@ -84,7 +84,10 @@ class BinomialBias(sc.prettyobj):
         # (n-actual)/(n-expected) - ratio for other group
         # actual/expected - ratio for relative proportion
         bias = ((n-actual)/(n-expect))/(actual/expect)
-        ncdf = sum(e_pmf[x<=actual])
+        if actual <= expect:
+            cumprob = sum(e_pmf[x<=actual])
+        else:
+            cumprob = sum(e_pmf[x>=actual])
         
         # Gaussian CI approximation
         e_mean = n*eprop
@@ -119,7 +122,7 @@ class BinomialBias(sc.prettyobj):
         self.results.expected_ratio = self.expected/self.n
         
         # Store outputs
-        self.results.cumprob = ncdf
+        self.results.cumprob = cumprob
         self.results.bias = bias
         self.results.p_future = p_future
         self.results.expected_low = e_low
@@ -144,7 +147,7 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, fig=None, dist_color='skyblue', cdf_color='darkblue', ci_color='k', show=True):
+    def plot(self, fig=None, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', show=True):
         '''
         Plot the results of the bias calculation
         '''
@@ -166,14 +169,13 @@ class BinomialBias(sc.prettyobj):
         # Shorten variables into a data dict
         d = sc.mergedicts(self.results, self.plot_results)
         barkw = sc.objdict(width=0.95, alpha=0.7)
+        tkw = sc.objdict(horizontalalignment='center', c=ci_color)
         
 
         #%% Create the figure
         if fig is None:
             fig = pl.figure(figsize=(8,8))
         pl.subplots_adjust(top=0.90, bottom=0.08, right=0.98, hspace=0.6)
-        # pl.figtext(0.02, 0.97, '(a)', fontsize=12)
-        # pl.figtext(0.02, 0.47, '(b)', fontsize=12)
     
         ## First figure: binomial distribution of expected appointments
         ax1 = pl.subplot(2,1,1)
@@ -182,10 +184,9 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title('Expected vs. actual appointments\n\n', fontweight='bold')
+        pl.title(f'Expected ($n_E$={d.expected}) vs. actual ($n_A$={d.actual}) appointments\n\n')
     
         ## Calculate cdf
-        # mplot([d.actual, d.actual], [0, d.e_pmf[d.x==d.actual][0]], c=cdf_color, lw=2.0)
     
         #Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
         e_max = max(d.e_pmf)
@@ -194,73 +195,82 @@ class BinomialBias(sc.prettyobj):
         if d.actual <= d.expected:
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
-            xtext = d.n/8+0.5
-            ytext = 3.5*max(d.e_pmf)/4
+            xtext = d.n*0.1
+            label = '$P(n ≤ n_A)$'
+            ha = 'left'
         else:
             rarea = d.x[d.x>=d.actual]
             yarea = d.e_pmf[d.x>=d.actual]
-            xtext = 3*d.n/4
-            ytext = 3*e_max/4
+            xtext = d.n*0.9
+            label = '$P(n ≥ n_A)$'
+            ha = 'right'
+            
+        label += f' = {d.cumprob:0.3f}'
+        label += '\n'
+        label += f'Bias = {d.bias:0.2n}'
     
-        # marea(rarea, yarea, cdf_color)
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
-        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.3f}', c=cdf_color, horizontalalignment='center')
+        pl.text(xtext, e_max, label, c=ci_color, horizontalalignment=ha)
     
-        #Add vertical line and r_a
-        # pl.plot([d.actual, d.actual],[0.7*e_max/4, 0.7*e_max/2], c='k', lw=1.0)
-        # pl.text(d.actual+0.2, 0.9*e_max/2,'$n_A$', c='k', horizontalalignment='center')
-    
-    
-        ## Plot 95% CI  values
-        dw = barkw.width/2
-        pl.fill_between([d.expected_low-dw, d.expected_high+dw], [1.2*e_max]*2, facecolor=ci_color, zorder=-10, alpha=0.05)
-        # mplot([d.expected_low, d.expected_low], [0, d.e_pmf[d.x==d.expected_low][0]],c=ci_color,lw=2.0)
-        # mplot([d.expected_high, d.expected_high], [0, d.e_pmf[d.x==d.expected_high][0]],c=ci_color,lw=2.0)
-    
-        mplot([d.expected_low-dw, d.expected_high+dw], [1.2*e_max]*2, c=ci_color, lw=2.0)
-        pl.scatter(d.expected, 1.2*e_max, 70, c=ci_color)
-        pl.text(d.expected, 1.3*e_max,'95% CI', c=ci_color, horizontalalignment='center')
+        # dye = 0.05*max(d.e_pmf)
+        # pl.text(d.expected, dye+d.e_pmf[d.expected],'$n_E$', **tkw)
+        # if d.expected != d.actual:
+        #     pl.text(d.actual, dye+d.e_pmf[d.actual],'$n_A$', **tkw)
         
-        dy = 0.05*max(d.e_pmf)
-        pl.text(d.expected, dy+d.e_pmf[d.expected],'$n_E$', c=ci_color, horizontalalignment='center')
-        pl.text(d.actual, dy+d.e_pmf[d.actual],'$n_A$', c=ci_color, horizontalalignment='center')
     
-        # pl.grid(True, axis='y')
-        # pl.minorticks_on()
-        sc.boxoff()
-        # sc.setylim()
-    
-
         ## Second plot: if we kept sampling from this distribution    
         ax2 = pl.subplot(2,1,2)
     
         pl.bar(d.x, d.a_pmf, facecolor=dist_color, **barkw)
+        pl.bar(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], facecolor=cdf_color, **barkw)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
         pl.title('Expected distribution of future appointments\n\n', fontweight='bold')
     
-        mplot([d.actual_low, d.actual_high], [1.1*a_max, 1.1*a_max], c=ci_color,lw=2.0)
-        pl.scatter(d.actual, 1.1*a_max, 70, c=ci_color)
-        pl.text(d.actual, 1.2*a_max,'95% CI', c=ci_color,horizontalalignment='center')
-    
-        pl.bar(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], facecolor=cdf_color, **barkw)
-    
         if d.actual < d.n/2:
-            fairx = 5*d.n/8
+            fairx = d.n*0.9
+            ha = 'right'
         else:
-            fairx = d.n/4
-        fairstr = '$P_{future}$'
-        pl.text(fairx, 3*a_max/4,f'{fairstr} = {d.p_future:0.3f}', c=cdf_color, horizontalalignment='center')
-    
-        # pl.grid(True, axis='y')
-        # pl.minorticks_on()
-        sc.boxoff()
-        # sc.setylim()
+            fairx = d.n*0.1
+            ha = 'left'
+        futurestr = '$P_{future}$'
+        pl.text(fairx, a_max, f'{futurestr} = {d.p_future:0.3f}', c=ci_color, horizontalalignment=ha)
         
-        for ax in [ax1, ax2]:
-            ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
-            ax.set_xlim([0-dw, d.x[-1]+dw])
+        
+        dw = barkw.width/2
+        for i,ax in enumerate([ax1, ax2]):
+            if   d.n <=  10: loc = mpl.ticker.MultipleLocator(1)
+            elif d.n <=  20: loc = mpl.ticker.MultipleLocator(2)
+            elif d.n <=  50: loc = mpl.ticker.MultipleLocator(5)
+            elif d.n <= 100: loc = mpl.ticker.MultipleLocator(10)
+            else:            loc = mpl.ticker.MaxNLocator(integer=True)
+            ax.xaxis.set_major_locator(loc)
+            ax.set_xlim([0-dw, d.n+dw])
+            sc.boxoff(ax)
+            
+            ## Plot 95% CI  values
+            if i == 0:
+                low  = d.expected_low
+                high = d.expected_high
+                val  = d.expected
+                vmax = e_max
+                pmf = d.e_pmf
+            else:
+                low  = d.actual_low
+                high = d.actual_high
+                val  = d.actual
+                vmax = a_max
+                pmf = d.a_pmf
+            ax.fill_between([low-dw, high+dw], [1.2*vmax]*2, facecolor=ci_color, zorder=-10, alpha=0.05)
+            ax.plot([low-dw, high+dw], [1.2*vmax]*2, c=ci_color, lw=2.0)
+            ax.scatter(val, 1.2*vmax, 70, c=ci_color)
+            ax.text(val, 1.3*vmax,'95% CI', c=ci_color, horizontalalignment='center')
+            
+            dy = 0.05*max(pmf)
+            ax.text(d.expected, dy+pmf[d.expected],'$n_E$', **tkw)
+            if d.expected != d.actual:
+                ax.text(d.actual, dy+pmf[d.actual],'$n_A$', **tkw)
         
         if show:
             pl.show()
