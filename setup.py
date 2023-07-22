@@ -42,10 +42,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        numpy,
-        scipy,
-        matplotlib,
-        sciris,
+        'numpy',
+        'scipy',
+        'matplotlib',
+        'sciris',
     ],
     extras_require={
         'app':  [
