@@ -4,12 +4,12 @@ Test the app -- uses multiproccessing to avoid being blocking
 
 import sciris as sc
 import multiprocessing as mp
-import binomialbias as bb
+from binomialbias import app as bbapp
 
 
 def run_app():
     ''' Call the app to run programmatically '''
-    bb.app.run()
+    bbapp.run()
     return
 
 
@@ -20,7 +20,7 @@ def test_app(delay=2):
     print(f'Waiting {delay} seconds before shutdown ...')
     sc.timedsleep(delay) # Waits for it to start
     proc.terminate() # Shuts down server
-    return bb.app.app
+    return bbapp.app
 
 
 if __name__ == '__main__':
