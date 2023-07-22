@@ -15,12 +15,8 @@ __all__ = ['BinomialBias', 'plot_bias']
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=10, expected=5, actual=2, display=True, plot=False):
+    def __init__(self, n=10, expected=5, actual=2, display=False, plot=False):
         '''
-        
-        ### UPDATE DOCSTRING!!!!
-        
-        
         Code to supplement Quantitative Assessment of University Discrimination -
         by Prof. P. A. Robinson, School of Physics, University of Sydney
         Python conversion by Dr. C. C. Kerr, Institute for Disease Modeling
@@ -152,20 +148,6 @@ class BinomialBias(sc.prettyobj):
         Plot the results of the bias calculation
         '''
         
-        def marea(x, y, fc='r', **kwargs):
-            ''' Settings to replicate an area plot in Matlab '''
-            return pl.fill_between(x, y1=y, y2=0, facecolor=fc, zorder=10, **kwargs)
-    
-    
-        def mplot(x, y, **kwargs):
-            ''' Settings to replicate a line plot in Matlab '''
-            return pl.plot(x, y, zorder=20, **kwargs)
-    
-        def mbar(x, y, **kwargs):
-            ''' Settings to replicate a line plot in Matlab '''
-            kwargs['facecolor'] = kwargs.pop('c', None)
-            return pl.bar(x, y, zorder=20, **kwargs)
-        
         # Shorten variables into a data dict
         d = sc.mergedicts(self.results, self.plot_results)
         barkw = sc.objdict(width=0.95, alpha=0.7)
@@ -184,7 +166,7 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title(f'Expected ($n_E$={d.expected}) vs. actual ($n_A$={d.actual}) appointments\n\n')
+        pl.title(f'Expected ($n_E=${d.expected}) vs. actual ($n_A=${d.actual}) out of {d.n} appointments\n\n')
     
         ## Calculate cdf
     
@@ -212,11 +194,6 @@ class BinomialBias(sc.prettyobj):
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
         pl.text(xtext, e_max, label, c=ci_color, horizontalalignment=ha)
     
-        # dye = 0.05*max(d.e_pmf)
-        # pl.text(d.expected, dye+d.e_pmf[d.expected],'$n_E$', **tkw)
-        # if d.expected != d.actual:
-        #     pl.text(d.actual, dye+d.e_pmf[d.actual],'$n_A$', **tkw)
-        
     
         ## Second plot: if we kept sampling from this distribution    
         ax2 = pl.subplot(2,1,2)
@@ -226,7 +203,7 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title('Expected distribution of future appointments\n\n', fontweight='bold')
+        pl.title('Predicted distribution of future appointments\n\n')
     
         if d.actual < d.n/2:
             fairx = d.n*0.9
@@ -278,15 +255,16 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=10, expected=5, actual=6, show=True):
+def plot_bias(n=10, expected=5, actual=6, show=True, display=True):
     '''
     Script
     '''
     B = BinomialBias(n=n, expected=expected, actual=actual)
-    fig = B.plot(show=show)
-    return fig
+    if display:
+        B.display()
+    B.plot(show=show)
+    return B
 
 
 if __name__ == '__main__':
     B = plot_bias()
-    pl.show()
