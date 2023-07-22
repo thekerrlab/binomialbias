@@ -1,4 +1,10 @@
 #!/bin/bash
 # Deploy the Python app to shinyapps.io
 
+# First:
+# conda create -n shinypython=3.9 -y
+# conda activate shiny
+# pip install -r requirements.txt
+# pip install -r requirements_app.txt
+
 rsconnect deploy shiny ./binomialbias --name sciris --title "binomialbias"
