@@ -6,6 +6,7 @@ import numpy as np
 import scipy.stats as st
 import sciris as sc
 import pylab as pl
+import matplotlib as mpl
 
 pl.rc('figure', dpi=150)
 
@@ -169,19 +170,19 @@ class BinomialBias(sc.prettyobj):
 
         #%% Create the figure
         if fig is None:
-            fig = pl.figure(figsize=(8,6))
-        pl.subplots_adjust(top=0.94, bottom=0.08, right=0.98, hspace=0.4)
+            fig = pl.figure(figsize=(8,8))
+        pl.subplots_adjust(top=0.90, bottom=0.08, right=0.98, hspace=0.6)
         # pl.figtext(0.02, 0.97, '(a)', fontsize=12)
         # pl.figtext(0.02, 0.47, '(b)', fontsize=12)
     
         ## First figure: binomial distribution of expected appointments
-        pl.subplot(2,1,1)
+        ax1 = pl.subplot(2,1,1)
         pl.bar(d.x, d.e_pmf, facecolor=dist_color, **barkw)
         # pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title('Actual vs. expected appointments')
+        pl.title('Expected vs. actual appointments\n\n', fontweight='bold')
     
         ## Calculate cdf
         # mplot([d.actual, d.actual], [0, d.e_pmf[d.x==d.actual][0]], c=cdf_color, lw=2.0)
@@ -212,28 +213,32 @@ class BinomialBias(sc.prettyobj):
     
         ## Plot 95% CI  values
         dw = barkw.width/2
-        pl.fill_between([d.expected_low-dw, d.expected_high+dw], [1.1*e_max]*2, facecolor=ci_color, zorder=-10, alpha=0.05)
+        pl.fill_between([d.expected_low-dw, d.expected_high+dw], [1.2*e_max]*2, facecolor=ci_color, zorder=-10, alpha=0.05)
         # mplot([d.expected_low, d.expected_low], [0, d.e_pmf[d.x==d.expected_low][0]],c=ci_color,lw=2.0)
         # mplot([d.expected_high, d.expected_high], [0, d.e_pmf[d.x==d.expected_high][0]],c=ci_color,lw=2.0)
     
-        mplot([d.expected_low-dw, d.expected_high+dw], [1.1*e_max]*2, c=ci_color, lw=2.0)
-        pl.scatter(d.expected, 1.1*e_max, 70, c=ci_color)
-        pl.text(d.expected, 1.2*e_max,'95% CI', c=ci_color, horizontalalignment='center')
+        mplot([d.expected_low-dw, d.expected_high+dw], [1.2*e_max]*2, c=ci_color, lw=2.0)
+        pl.scatter(d.expected, 1.2*e_max, 70, c=ci_color)
+        pl.text(d.expected, 1.3*e_max,'95% CI', c=ci_color, horizontalalignment='center')
+        
+        dy = 0.05*max(d.e_pmf)
+        pl.text(d.expected, dy+d.e_pmf[d.expected],'$n_E$', c=ci_color, horizontalalignment='center')
+        pl.text(d.actual, dy+d.e_pmf[d.actual],'$n_A$', c=ci_color, horizontalalignment='center')
     
         # pl.grid(True, axis='y')
-        pl.minorticks_on()
+        # pl.minorticks_on()
         sc.boxoff()
         # sc.setylim()
     
 
         ## Second plot: if we kept sampling from this distribution    
-        pl.subplot(2,1,2)
+        ax2 = pl.subplot(2,1,2)
     
         pl.bar(d.x, d.a_pmf, facecolor=dist_color, **barkw)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title('Expected distribution of additional appointments')
+        pl.title('Expected distribution of future appointments\n\n', fontweight='bold')
     
         mplot([d.actual_low, d.actual_high], [1.1*a_max, 1.1*a_max], c=ci_color,lw=2.0)
         pl.scatter(d.actual, 1.1*a_max, 70, c=ci_color)
@@ -252,6 +257,10 @@ class BinomialBias(sc.prettyobj):
         # pl.minorticks_on()
         sc.boxoff()
         # sc.setylim()
+        
+        for ax in [ax1, ax2]:
+            ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
+            ax.set_xlim([0-dw, d.x[-1]+dw])
         
         if show:
             pl.show()
