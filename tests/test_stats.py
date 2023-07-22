@@ -1,11 +1,10 @@
 '''
-Simple tests of plotting
+Simple tests of the app
 '''
 
 import binomialbias as bb
 
-def test_plotting():
-    out = []
+def test_stats():
     for (n,e,a) in [
             [ 10, 5, 5],
             [ 30, 15, 20],
@@ -13,10 +12,9 @@ def test_plotting():
             ]:
         B = bb.BinomialBias(n=n, expected=e, actual=a)
         B.plot()
-        out.append(B)
-    return out
+    return B
 
 if __name__ == '__main__':
-    out = test_plotting()
+    B = test_plotting()
 
     

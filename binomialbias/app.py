@@ -2,8 +2,14 @@
 Shiny app for BinomialBias
 '''
 
+#%% Imports
+
+import sciris as sc
 import binomialbias as bb
 from shiny import App, render, ui
+
+
+#%% Define the interface
 
 desc = f'''
 <div>This webapp calculates bias and discrimination in appointment processes, based 
@@ -28,8 +34,8 @@ app_ui = ui.page_fluid(
             ui.hr(),
             ui.h4('Inputs'),
             ui.input_slider('n', 'Total number of appointments', 0, 100, 20),
-            ui.input_slider('expected', 'Expected appointments', 0, 100, 5),
-            ui.input_slider('actual', 'Actual appointments', 0, 100, 6),
+            ui.input_slider('e', 'Expected appointments', 0, 100, 5),
+            ui.input_slider('a', 'Actual appointments', 0, 100, 6),
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
@@ -39,19 +45,25 @@ app_ui = ui.page_fluid(
 )
 
 
+#%% Define the server
+
 def server(input, output, session):
     
     @output
     @render.plot(alt='Bias distributions')
     def plot_bias():
-        n        = input.n()
-        expected = input.expected()
-        actual   = input.actual()
-        bb.plot_bias(n, expected, actual, show=False, display=False)
+        n = input.n()
+        e = input.e()
+        a = input.a()
+        bb.plot_bias(n=n, expected=e, actual=a, show=False, display=False)
         return
 
     return
-    
 
 
+#%% Define and optionally run the app
 app = App(app_ui, server, debug=True)
+
+if __name__ == '__main__':
+    cmd = 'shiny run --reload'
+    sc.runcommand(cmd)

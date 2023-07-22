@@ -151,7 +151,8 @@ class BinomialBias(sc.prettyobj):
         # Shorten variables into a data dict
         d = sc.mergedicts(self.results, self.plot_results)
         barkw = sc.objdict(width=0.95, alpha=0.7)
-        tkw = sc.objdict(horizontalalignment='center', c=ci_color)
+        tkw   = dict(horizontalalignment='center', c=ci_color)
+        bbkw  = dict(facecolor='w', alpha=0.7, edgecolor='none')
         
 
         #%% Create the figure
@@ -162,7 +163,6 @@ class BinomialBias(sc.prettyobj):
         ## First figure: binomial distribution of expected appointments
         ax1 = pl.subplot(2,1,1)
         pl.bar(d.x, d.e_pmf, facecolor=dist_color, **barkw)
-        # pl.plot(d.x, d.e_pmf, c='k', lw=1.5)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
@@ -170,7 +170,7 @@ class BinomialBias(sc.prettyobj):
     
         ## Calculate cdf
     
-        #Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
+        # Two conditions depending on whether group is >/< expected ratio, below adds the shading in fig1a
         e_max = max(d.e_pmf)
         a_max = max(d.a_pmf)
         lt_actual = d.x<=d.actual
@@ -192,7 +192,7 @@ class BinomialBias(sc.prettyobj):
         label += f'Bias = {d.bias:0.2n}'
     
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
-        pl.text(xtext, e_max, label, c=ci_color, horizontalalignment=ha)
+        pl.text(xtext, e_max, label, c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
     
     
         ## Second plot: if we kept sampling from this distribution    
@@ -212,7 +212,7 @@ class BinomialBias(sc.prettyobj):
             fairx = d.n*0.1
             ha = 'left'
         futurestr = '$P_{future}$'
-        pl.text(fairx, a_max, f'{futurestr} = {d.p_future:0.3f}', c=ci_color, horizontalalignment=ha)
+        pl.text(fairx, a_max, f'{futurestr} = {d.p_future:0.3f}', c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
         
         
         dw = barkw.width/2
