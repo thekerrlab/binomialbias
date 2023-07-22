@@ -5,11 +5,16 @@ Test app
 import binomialbias as bb
 from shiny import App, render, ui
 
-desc = '''For more information on this webapp, see the [paper](http://binomialbiaspaper.sciris.org):
-
-**Quantitative assessment of discrimination in appointments to senior Australian university positions**
-P. A. Robinson and C. C. Kerr
-University of Sydney, Australia
+desc = '''
+<div>This webapp calculates bias and discrimination in appointment processes, based 
+on the binomial distribution. It is provided in support of the following paper:<br>
+<br>
+<b>Quantitative assessment of discrimination in appointments 
+to senior Australian university positions.</b> Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
+<br>
+For more information, please see the <a href="https://github.com/braindynamicsusyd/binomialbias">GitHub repository</a>
+or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.
+</div>
 '''
 
 app_ui = ui.page_fluid(
@@ -17,7 +22,7 @@ app_ui = ui.page_fluid(
         ui.panel_sidebar(
             ui.h2('BinomialBias'),
             ui.hr(),
-            ui.markdown(desc),
+            ui.HTML(desc),
             ui.hr(),
             ui.h4('Inputs'),
             ui.input_slider('n', 'Total number of appointments', 0, 100, 20),
