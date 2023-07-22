@@ -104,7 +104,7 @@ class BinomialBias(sc.prettyobj):
         # future_high = int(np.median([a_high, e_low, e_high]))
     
         # Calculate p_future
-        p_future = sum(a_pmf[e_low:e_high])
+        p_future = sum(a_pmf[e_low:e_high+1]) # +1 since used as an index
         # fair_round = round(p_future, 2) ## Add on PU text
         
         
