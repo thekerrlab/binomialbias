@@ -35,7 +35,7 @@ class BinomialBias(sc.prettyobj):
             ci: 95% confidence interval for individuals given a fair process
             cdf: Cumulative distribution function of ra or less appointments
             bias: Preference ratio the estimate of the disparity in how two groups are viewed by selectors
-            fairness: Probability of unbiased selection; values much less than 1 do imply bias; values < 0.1 should be cause for serious concern and values < 0.01 should provoke urgent action.
+            p_future: Probability of unbiased selection; values much less than 1 do imply bias; values < 0.1 should be cause for serious concern and values < 0.01 should provoke urgent action.
     
         **Example**::
             
@@ -98,12 +98,14 @@ class BinomialBias(sc.prettyobj):
         a_std  = np.sqrt(a_mean*(1-aprop))
 
         # Calculate bounds
-        a_low  = int(max(0, np.round(a_mean-2*a_std)))
-        a_high = int(min(n, np.round(a_mean+2*a_std)))
+        a_low  = int(max(0, np.ceil(a_mean-2*a_std)))
+        a_high = int(min(n, np.floor(a_mean+2*a_std)))
+        # future_low  = int(np.median([a_low,  e_low, e_high]))
+        # future_high = int(np.median([a_high, e_low, e_high]))
     
-        # Calculate fairness
-        fairness = sum(a_pmf[a_low:a_high+1])
-        # fair_round = round(fairness, 2) ## Add on PU text
+        # Calculate p_future
+        p_future = sum(a_pmf[e_low:e_high])
+        # fair_round = round(p_future, 2) ## Add on PU text
         
         
         # Assemble into a results object
@@ -118,7 +120,7 @@ class BinomialBias(sc.prettyobj):
         # Store outputs
         self.results.cumprob = ncdf
         self.results.bias = bias
-        self.results.fairness = fairness
+        self.results.p_future = p_future
         self.results.expected_low = e_low
         self.results.expected_high = e_high
         
@@ -141,7 +143,7 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, fig=None, dist_color='lightblue', cdf_color='darkblue', ci_color='k'):
+    def plot(self, fig=None, dist_color='lightblue', cdf_color='darkblue', ci_color='k', show=True):
         '''
         Plot the results of the bias calculation
         '''
@@ -200,7 +202,7 @@ class BinomialBias(sc.prettyobj):
     
         # marea(rarea, yarea, cdf_color)
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
-        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.2f}', c=cdf_color, horizontalalignment='center')
+        pl.text(xtext, ytext, f'$P(n_A ≤ n_E)$ = {d.cumprob:0.3f}', c=cdf_color, horizontalalignment='center')
     
         #Add vertical line and r_a
         pl.plot([d.actual, d.actual],[0.7*e_max/4, 0.7*e_max/2], c=cdf_color, lw=1.0)
@@ -239,23 +241,26 @@ class BinomialBias(sc.prettyobj):
             fairx = 5*d.n/8
         else:
             fairx = d.n/4
-        fairstr = '$P_{fair}$'
-        pl.text(fairx, 3*a_max/4,f'{fairstr} = {d.fairness:0.2f}', c=cdf_color, horizontalalignment='center')
+        fairstr = '$P_{future}$'
+        pl.text(fairx, 3*a_max/4,f'{fairstr} = {d.p_future:0.3f}', c=cdf_color, horizontalalignment='center')
     
         # pl.grid(True, axis='y')
         # pl.minorticks_on()
         sc.boxoff()
         sc.setylim()
         
+        if show:
+            pl.show()
+        
         return fig
 
 
-def plot_bias(n=10, expected=5, actual=6):
+def plot_bias(n=10, expected=5, actual=6, show=True):
     '''
     Script
     '''
     B = BinomialBias(n=n, expected=expected, actual=actual)
-    fig = B.plot()
+    fig = B.plot(show=show)
     return fig
 
 
