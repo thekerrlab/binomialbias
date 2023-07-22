@@ -24,6 +24,7 @@ def test_plotting(show=False):
         
     return out
 
+
 if __name__ == '__main__':
     out = test_plotting(show=True)
 
