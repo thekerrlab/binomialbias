@@ -1,0 +1,5 @@
+#!/bin/bash
+# Run as a local Shiny app
+
+cd binomialbias
+shiny run --reload
