@@ -1,4 +1,11 @@
+import os
+import runpy
 from setuptools import setup, find_packages
+
+# Get version
+cwd = os.path.abspath(os.path.dirname(__file__))
+versionpath = os.path.join(cwd, 'binomialbias', 'version.py')
+version = runpy.run_path(versionpath)['__version__']
 
 # Get the documentation
 with open("README.md", "r") as fh:
@@ -15,15 +22,16 @@ CLASSIFIERS = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 
 setup(
     name="binomialbias",
-    version="1.0.0",
+    version=version,
     author="P.A. Robinson, C. C. Kerr",
-    author_email="robinson@physics.usyd.edu.au",
+    author_email="peter.robinson@sydney.edu.au",
     description="Library for quantitative assessment of discrimination",
     long_description=long_description,
     long_description_content_type="text/markdown",

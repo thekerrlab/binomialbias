@@ -1,8 +1,7 @@
 '''
-Test app
+Shiny app for BinomialBias
 '''
 
-import sciris as sc
 import binomialbias as bb
 from shiny import App, render, ui
 
@@ -33,8 +32,7 @@ app_ui = ui.page_fluid(
             ui.input_slider('actual', 'Actual appointments', 0, 100, 6),
         ),
         ui.panel_main(
-            ui.output_plot('plot_bias', width='100%', height='100%', hover=True),
-            ui.output_text_verbatim("hover_info"),
+            ui.output_plot('plot_bias', width='100%', height='100%'),
         ),
     ),
     title = 'BinomialBias',
@@ -42,6 +40,7 @@ app_ui = ui.page_fluid(
 
 
 def server(input, output, session):
+    
     @output
     @render.plot(alt='Bias distributions')
     def plot_bias():
@@ -49,11 +48,10 @@ def server(input, output, session):
         expected = input.expected()
         actual   = input.actual()
         bb.plot_bias(n, expected, actual, show=False, display=False)
+        return
+
+    return
     
-    @output
-    @render.text()
-    def hover_info():
-        return "hover:\n" + sc.jsonify(input.plot_bias_hover(), indent=2, tostring=True)
 
 
 app = App(app_ui, server, debug=True)
