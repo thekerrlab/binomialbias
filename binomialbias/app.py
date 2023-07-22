@@ -6,7 +6,7 @@ Shiny app for BinomialBias
 
 import sciris as sc
 import binomialbias as bb
-from shiny import App, render, ui
+from shiny import App, render, ui, run_app
 
 
 #%% Define the interface
@@ -64,6 +64,12 @@ def server(input, output, session):
 #%% Define and optionally run the app
 app = App(app_ui, server, debug=True)
 
+
+def run(**kwargs):
+    ''' Run the app -- equivalent to "shiny run --reload" '''
+    return run_app(app, **kwargs)
+
+
 if __name__ == '__main__':
-    cmd = 'shiny run --reload'
-    sc.runcommand(cmd)
+    run()
+    

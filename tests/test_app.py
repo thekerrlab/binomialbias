@@ -1,20 +1,23 @@
 '''
-Simple tests of the app
+Test the app -- uses threads to avoid being blocking
 '''
 
+import threading
 import binomialbias as bb
 
-def test_stats():
-    for (n,e,a) in [
-            [ 10, 5, 5],
-            [ 30, 15, 20],
-            [100, 50, 30],
-            ]:
-        B = bb.BinomialBias(n=n, expected=e, actual=a)
-        B.plot()
-    return B
+
+def run_app():
+    bb.app.run()
+    return
+
+def test_app(delay=2):
+    thread = threading.Thread(target=run_app)
+    thread.start()
+    # thread.join(delay)
+    # bb.app.app.stop()
+    return bb.app.app
 
 if __name__ == '__main__':
-    B = test_plotting()
+    app = test_app()
 
     

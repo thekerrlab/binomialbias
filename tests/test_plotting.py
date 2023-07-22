@@ -2,7 +2,10 @@
 Simple tests of plotting
 '''
 
+import sciris as sc
 import binomialbias as bb
+
+sc.options(interactive=False)
 
 def test_plotting():
     out = []
