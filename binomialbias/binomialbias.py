@@ -248,6 +248,8 @@ class BinomialBias(sc.prettyobj):
             ax.text(d.expected, dy+pmf[d.expected],'$n_E$', **tkw)
             if d.expected != d.actual:
                 ax.text(d.actual, dy+pmf[d.actual],'$n_A$', **tkw)
+            
+            ax.set_aspect(d.n/vmax*0.3)
         
         if show:
             pl.show()
