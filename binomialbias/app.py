@@ -34,8 +34,8 @@ app_ui = ui.page_fluid(
             ui.hr(),
             ui.h4('Inputs'),
             ui.input_slider('n', 'Total number of appointments', 0, 100, 20),
-            ui.input_slider('e', 'Expected appointments', 0, 100, 5),
-            ui.input_slider('a', 'Actual appointments', 0, 100, 6),
+            ui.input_slider('e', 'Expected appointments', 0, 100, 10),
+            ui.input_slider('a', 'Actual appointments', 0, 100, 7),
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),

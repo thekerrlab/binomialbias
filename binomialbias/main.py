@@ -15,7 +15,7 @@ __all__ = ['BinomialBias', 'plot_bias']
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=10, expected=5, actual=2, display=False, plot=False):
+    def __init__(self, n=20, expected=10, actual=7, display=False, plot=False):
         '''
         Code to supplement Quantitative Assessment of University Discrimination -
         by Prof. P. A. Robinson, School of Physics, University of Sydney
@@ -257,14 +257,14 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=10, expected=5, actual=6, show=True, display=True):
+def plot_bias(n=20, expected=10, actual=7, show=True, display=True):
     '''
     Script
     '''
     B = BinomialBias(n=n, expected=expected, actual=actual)
+    B.plot(show=show)
     if display:
         B.display()
-    B.plot(show=show)
     return B
 
 
