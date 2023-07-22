@@ -11,10 +11,6 @@ version = runpy.run_path(versionpath)['__version__']
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# Get the requirements
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
-
 CLASSIFIERS = [
     "Environment :: Console",
     "Intended Audience :: Science/Research",
