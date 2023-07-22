@@ -2,10 +2,11 @@
 Test app
 '''
 
+import sciris as sc
 import binomialbias as bb
 from shiny import App, render, ui
 
-desc = '''
+desc = f'''
 <div>This webapp calculates bias and discrimination in appointment processes, based 
 on the binomial distribution. It is provided in support of the following paper:<br>
 <br>
@@ -13,7 +14,9 @@ on the binomial distribution. It is provided in support of the following paper:<
 to senior Australian university positions.</b> Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
 <br>
 For more information, please see the <a href="https://github.com/braindynamicsusyd/binomialbias">GitHub repository</a>
-or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.
+or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.<br>
+<br>
+<i>Version: {bb.__version__} ({bb.__versiondate__})</i><br>
 </div>
 '''
 
@@ -30,9 +33,11 @@ app_ui = ui.page_fluid(
             ui.input_slider('actual', 'Actual appointments', 0, 100, 6),
         ),
         ui.panel_main(
-            ui.output_plot('plot_bias', width='100%', height='100%'),
+            ui.output_plot('plot_bias', width='100%', height='100%', hover=True),
+            ui.output_text_verbatim("hover_info"),
         ),
     ),
+    title = 'BinomialBias',
 )
 
 
@@ -44,6 +49,11 @@ def server(input, output, session):
         expected = input.expected()
         actual   = input.actual()
         bb.plot_bias(n, expected, actual, show=False, display=False)
+    
+    @output
+    @render.text()
+    def hover_info():
+        return "hover:\n" + sc.jsonify(input.plot_bias_hover(), indent=2, tostring=True)
 
 
 app = App(app_ui, server, debug=True)
