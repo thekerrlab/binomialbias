@@ -4,6 +4,7 @@ Simple tests of the app
 
 import sciris as sc
 import binomialbias as bb
+import pytest
 
 def test_stats(atol=0.01):
     out = sc.objdict()
@@ -38,7 +39,24 @@ def test_stats(atol=0.01):
         
     return out
 
+
+def test_invalid():
+    ''' Test extreme values '''
+    
+    out = bb.BinomialBias(n=10, expected=5, actual=0)
+    
+    with pytest.raises(ValueError):
+        bb.BinomialBias(n=0, expected=0, actual=0)
+    with pytest.raises(ValueError):
+        bb.BinomialBias(n=10, expected=11, actual=5)
+    with pytest.raises(ValueError):
+        bb.BinomialBias(n=10, expected=5, actual=11)
+
+    return out
+
+
 if __name__ == '__main__':
     out = test_stats()
+    out2 = test_invalid()
 
     
