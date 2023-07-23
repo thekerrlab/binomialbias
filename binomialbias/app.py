@@ -4,7 +4,6 @@ Shiny app for BinomialBias
 
 #%% Imports
 
-import sciris as sc
 import binomialbias as bb
 from shiny import App, render, ui, run_app
 
@@ -15,8 +14,8 @@ desc = f'''
 <div>This webapp calculates bias and discrimination in appointment processes, based 
 on the binomial distribution. It is provided in support of the following paper:<br>
 <br>
-<b>Quantitative assessment of discrimination in appointments 
-to senior Australian university positions.</b> Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
+<b>Quantitative assessment of discrimination in appointments to senior Australian university positions.</b>
+Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
 <br>
 For more information, please see the <a href="https://github.com/braindynamicsusyd/binomialbias">GitHub repository</a>
 or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.<br>
