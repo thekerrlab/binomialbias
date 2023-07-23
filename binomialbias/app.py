@@ -4,8 +4,14 @@ Shiny app for BinomialBias
 
 #%% Imports
 
-from . import version as bv
-from . import main as bm
+# Get path right -- needed for Shiny deployment
+import sys
+import sciris as sc
+sys.path.append(sc.thisdir())
+
+# Import components
+import version as bv
+import main as bm
 from shiny import App, render, ui, run_app
 
 

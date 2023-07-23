@@ -4,12 +4,8 @@
 # First:
 # Archive existing app
 # Delete existing app
-# conda env remove -n shiny
-# conda create -n shiny python=3.8.13 -y
-# conda activate shiny
-# pip install rsconnect-python==1.10.0
-# pip install -r requirements.txt
-# pip install -e .[app]
 # Then run this script
 
-rsconnect deploy shiny ./binomialbias --name sciris --title "binomialbias"
+cd binomialbias
+rm -rf rsconnect-python
+rsconnect deploy shiny . --name sciris --title "binomialbias"
