@@ -208,26 +208,27 @@ class BinomialBias(sc.prettyobj):
         a_max = max(d.a_pmf)
         lt_actual = d.x<=d.actual
         if d.actual <= d.expected:
-            typical = d.expected/d.n > 0.2
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
-            xtext = d.n*0.1 if typical else d.n*0.9
-            ha = 'left' if typical else 'right'
             label = '$P(n ≤ n_A)$'
         else:
-            typical = d.expected/d.n < 0.8
             rarea = d.x[d.x>=d.actual]
             yarea = d.e_pmf[d.x>=d.actual]
-            xtext = d.n*0.9 if typical else d.n*0.1
-            ha = 'right' if typical else 'left'
             label = '$P(n ≥ n_A)$'
+            
+        if d.expected < d.n/2:
+            xtext = d.n*0.9
+            ha = 'right'
+        else:
+            xtext = d.n*0.1
+            ha = 'left'
             
         label += f' = {d.cumprob:0.3f}'
         label += '\n'
         label += f'Bias = {d.bias:0.3n}'
     
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
-        pl.text(xtext, e_max, label, c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
+        pl.text(xtext, e_max*0.95, label, c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
     
     
         ## Second plot: if we kept sampling from this distribution    
@@ -282,9 +283,11 @@ class BinomialBias(sc.prettyobj):
             dy = 0.05*max(pmf)
             ire = int(np.round(d.expected))
             ira = int(np.round(d.actual))
-            ax.text(d.expected, dy+pmf[ire],'$n_E$', **textkw)
-            if ire != ira:
-                ax.text(d.actual, dy+pmf[ira],'$n_A$', **textkw)
+            gap = abs(ire - ira) > d.n/20 # Don't plot both if they're too close together
+            if gap or i == 0:
+                ax.text(ire, dy+pmf[ire],'$n_E$', **textkw)
+            if gap or i == 1: 
+                ax.text(ira, dy+pmf[ira],'$n_A$', **textkw)
             
             ax.set_aspect(d.n/vmax*0.3)
         
