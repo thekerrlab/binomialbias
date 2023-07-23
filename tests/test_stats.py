@@ -43,7 +43,16 @@ def test_stats(atol=0.01):
 def test_invalid():
     ''' Test extreme values '''
     
-    out = bb.BinomialBias(n=10, expected=5, actual=0)
+    out = sc.autolist()
+    
+    # Zero actual
+    out += bb.BinomialBias(n=10, expected=5, actual=0)
+    
+    # Expected is fraction
+    out += bb.BinomialBias(n=11, expected=0.7, actual=4)
+    
+    # Actual is fraction
+    out += bb.BinomialBias(n=11, expected=0.7, actual=2**(1/2)/2)
     
     with pytest.raises(ValueError):
         bb.BinomialBias(n=0, expected=0, actual=0)
