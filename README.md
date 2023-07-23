@@ -2,6 +2,10 @@
 
 Library to compute and plot quantitative assessments of discrimination within organizations, based on the binomial distribution.
 
+This code supports the following paper:
+
+**Quantitative assessment of discrimination in appointments to senior Australian university positions.** Robinson PA, Kerr CC. *Under review (2023).*
+
 There are several ways to use this library, described below.
 
 ## Webapp
@@ -14,17 +18,19 @@ To use locally with Python, run
 
     pip install binomialbias
 
-This can then be used locally via e.g.:
+This can then be run via e.g.:
 
     import binomialbias as bb
     bb.plot_bias(n=9, actual=3, expected=4)
 
-The PyShiny app can also be run locally via `shiny app.py`.
+## Shiny
 
-## Jupyter
+To run the Shiny app, clone the repository from GitHub, then install with
 
-An equivalent Jupyter notebook is available in the `jupyter` folder.
+    pip install -e .[app]
 
-## Matlab
+The PyShiny app can then be run locally via the `run` script.
 
-An equivalent Matlab script is available in the `matlab` folder.
+## Other versions
+
+Older Jupyter and Matplotlib versions are available in the `archive` folder.

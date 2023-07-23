@@ -4,7 +4,6 @@ Shiny app for BinomialBias
 
 #%% Imports
 
-import sciris as sc
 import binomialbias as bb
 from shiny import App, render, ui, run_app
 
