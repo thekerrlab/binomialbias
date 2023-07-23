@@ -4,7 +4,8 @@ Shiny app for BinomialBias
 
 #%% Imports
 
-import binomialbias as bb
+from . import version as bv
+from . import main as bm
 from shiny import App, render, ui, run_app
 
 
@@ -20,7 +21,7 @@ Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
 For more information, please see the <a href="https://github.com/braindynamicsusyd/binomialbias">GitHub repository</a>
 or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.<br>
 <br>
-<i>Version: {bb.__version__} ({bb.__versiondate__})</i><br>
+<i>Version: {bv.__version__} ({bv.__versiondate__})</i><br>
 </div>
 '''
 
@@ -54,7 +55,7 @@ def server(input, output, session):
         n = input.n()
         e = input.e()
         a = input.a()
-        bb.plot_bias(n=n, expected=e, actual=a, show=False, display=False)
+        bm.plot_bias(n=n, expected=e, actual=a, show=False, display=False)
         return
 
     return
