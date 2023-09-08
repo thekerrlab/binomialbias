@@ -62,7 +62,7 @@ def server(input, output, session):
         n = input.n()
         e = input.e()
         a = input.a()
-        bm.plot_bias(n=n, expected=e, actual=a, show=False, display=False)
+        bm.plot_bias(n=n, expected=e, actual=a, show=False, display=False, letters=False)
         return
 
     return

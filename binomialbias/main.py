@@ -132,9 +132,10 @@ class BinomialBias(sc.prettyobj):
         
         # Store inputs
         self.results.n = self.n
-        self.results.actual = self.actual
         self.results.expected = self.expected
-        self.results.expected_ratio = self.expected/self.n
+        self.results.actual = self.actual
+        self.results.f_expected = self.expected/self.n
+        self.results.f_actual = self.actual/self.n
         
         # Store outputs
         self.results.expected_low = e_low
@@ -211,11 +212,11 @@ class BinomialBias(sc.prettyobj):
         if d.actual <= d.expected:
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
-            label = '$P(n ≤ n_a)$'
+            plabel = '$P(n ≤ n_a)$'
         else:
             rarea = d.x[d.x>=d.actual]
             yarea = d.e_pmf[d.x>=d.actual]
-            label = '$P(n ≥ n_a)$'
+            plabel = '$P(n ≥ n_a)$'
             
         if d.expected < d.n/2:
             xtext = d.n*0.9
@@ -223,14 +224,15 @@ class BinomialBias(sc.prettyobj):
         else:
             xtext = d.n*0.1
             ha = 'left'
-            
-        cumstr = f'{d.cumprob:0.3g}'
-        label += f' = {cumstr}'
+        
+        label  = f'$f_e$ = {d.f_expected:0.2g}\n'
+        label += f'$f_a$ = {d.f_actual:0.2g}\n'
         label += '\n'
-        label += f'Bias = {d.bias:0.3n}'
+        label += f'{plabel} = {d.cumprob:0.3g}\n'
+        label += f'$B$ = {d.bias:0.3n}'
     
         pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
-        pl.text(xtext, e_max*0.95, label, c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
+        pl.text(xtext, e_max*1.2, label, c=ci_color, horizontalalignment=ha, verticalalignment='top').set_bbox(bbkw)
     
     
         ## Second plot: if we kept sampling from this distribution    
@@ -307,12 +309,12 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=20, expected=10, actual=7, show=True, display=True):
+def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True):
     '''
     Script to simply plot the bias without creating a class instance; see BinomialBias for arguments
     '''
     B = BinomialBias(n=n, expected=expected, actual=actual)
-    B.plot(show=show)
+    B.plot(show=show, letters=letters)
     if display:
         B.display()
     return B
