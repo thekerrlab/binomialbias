@@ -31,6 +31,10 @@ or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mail
 </div>
 '''
 
+n_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
+e_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
+a_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
+
 app_ui = ui.page_fluid(
     {"style": "margin-top: 2rem"}, # Increase spacing at the top
     ui.layout_sidebar(
@@ -40,9 +44,13 @@ app_ui = ui.page_fluid(
             ui.HTML(desc),
             ui.hr(),
             ui.h4('Inputs'),
-            ui.input_slider('n', 'Total number of appointments', 0, 100, 20),
-            ui.input_slider('e', 'Expected appointments', 0, 100, 10),
-            ui.input_slider('a', 'Actual appointments', 0, 100, 7),
+            ui.div(
+                {"style": "display: flex; gap: 2rem"},
+                ui.input_slider('n', n_str, 0, 100, 20),
+                ui.input_text('n', 'Test'),
+            ),
+            ui.input_slider('e', e_str, 0, 100, 10),
+            ui.input_slider('a', a_str, 0, 100, 7),
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
