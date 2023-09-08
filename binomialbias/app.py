@@ -12,7 +12,8 @@ sys.path.append(sc.thisdir())
 # Import components
 import version as bv
 import main as bm
-from shiny import App, render, ui, run_app
+import shiny as sh
+from shiny import ui
 
 
 #%% Define the interface
@@ -34,7 +35,10 @@ or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mail
 n_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
 e_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
 a_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
+flex = {"style": "display: flex; gap: 2rem"}
 
+nmin = 0
+nmax = 100
 app_ui = ui.page_fluid(
     {"style": "margin-top: 2rem"}, # Increase spacing at the top
     ui.layout_sidebar(
@@ -45,12 +49,20 @@ app_ui = ui.page_fluid(
             ui.hr(),
             ui.h4('Inputs'),
             ui.div(
-                {"style": "display: flex; gap: 2rem"},
-                ui.input_slider('n', n_str, 0, 100, 20),
-                ui.input_text('n', 'Test'),
+                flex,
+                ui.input_slider('n', label=n_str, min=nmin, max=nmax, value=20),
+                ui.input_text('n2', 'Test'),
             ),
-            ui.input_slider('e', e_str, 0, 100, 10),
-            ui.input_slider('a', a_str, 0, 100, 7),
+            ui.div(
+                flex,
+                ui.input_slider('e', e_str, nmin, nmax, 10),
+                ui.input_text('e2', 'Test'),
+            ),
+            ui.div(
+                flex,
+                ui.input_slider('a', a_str, nmin, nmax, 7),
+                ui.input_text('a2', 'Test'),
+            ),
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
@@ -64,25 +76,37 @@ app_ui = ui.page_fluid(
 
 def server(input, output, session):
     
+    @sh.reactive.Effect()
+    def _():
+        x = input.n2()
+        try:
+            x = int(x)
+            print('UPDATING TO', x)
+            ui.update_slider('n', label=n_str, min=nmin, max=nmax, value=x)
+            print('UPDATED TO', x)
+        except Exception as E:
+            print('NOT VALID UPDATE', E)
+    
     @output
-    @render.plot(alt='Bias distributions')
+    @sh.render.plot(alt='Bias distributions')
     def plot_bias():
         n = input.n()
         e = input.e()
         a = input.a()
-        bm.plot_bias(n=n, expected=e, actual=a, show=False, display=False, letters=False)
+        n2 = input.n2()
+        bm.plot_bias(n=n, expected=e, actual=a, show=False, display=False, letters=False, tmp=n2)
         return
 
     return
 
 
 #%% Define and optionally run the app
-app = App(app_ui, server, debug=True)
+app = sh.App(app_ui, server, debug=True)
 
 
 def run(**kwargs):
     ''' Run the app -- equivalent to "shiny run --reload" '''
-    return run_app(app, **kwargs)
+    return sh.run_app(app, **kwargs)
 
 
 if __name__ == '__main__':

@@ -164,7 +164,7 @@ class BinomialBias(sc.prettyobj):
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
-             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True):
+             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, tmp=None):
         '''
         Plot the results of the bias calculation
         
@@ -302,6 +302,10 @@ class BinomialBias(sc.prettyobj):
         if letters:
             for label,y in zip(['(a)','(b)'], [1, 0.5]):
                 fig.text(0.03, y-0.05, label, fontsize=14)
+                
+        # Add temp label
+        if tmp:
+            fig.text(0.5, 0.5, str(tmp))
         
         if show:
             pl.show()
@@ -309,12 +313,12 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True):
+def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True, tmp=None):
     '''
     Script to simply plot the bias without creating a class instance; see BinomialBias for arguments
     '''
     B = BinomialBias(n=n, expected=expected, actual=actual)
-    B.plot(show=show, letters=letters)
+    B.plot(show=show, letters=letters, tmp=tmp)
     if display:
         B.display()
     return B
