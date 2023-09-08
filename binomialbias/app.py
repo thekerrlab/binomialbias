@@ -1,6 +1,6 @@
-'''
+"""
 Shiny app for BinomialBias
-'''
+"""
 
 #%% Imports
 
@@ -32,6 +32,7 @@ or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mail
 '''
 
 app_ui = ui.page_fluid(
+    {"style": "margin-top: 2rem"}, # Increase spacing at the top
     ui.layout_sidebar(
         ui.panel_sidebar(
             ui.h2('BinomialBias'),

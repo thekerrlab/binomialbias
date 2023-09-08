@@ -162,7 +162,7 @@ class BinomialBias(sc.prettyobj):
         return
 
 
-    def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', 
+    def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
              fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True):
         '''
         Plot the results of the bias calculation
@@ -171,6 +171,7 @@ class BinomialBias(sc.prettyobj):
             dist_color: the color of the full distribution
             cdf_color: the color of the part of the distribution being integrated
             ci_color: the color of the confidence bounds
+            letters: if True, show frame labels with letters
             fig: if supplied, plot using this figure
             barkw: a dictionary of keyword arguments for the bar plots (passed to pl.bar())
             figkw: a dictionary of keyword arguments for the figure (passed to pl.figure())
@@ -199,7 +200,7 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title(f'Expected ($n_E=${d.expected:0.0f}) vs. actual ($n_A=${d.actual:0.0f}) out of {d.n:0.0f} appointments\n\n')
+        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f}) out of $n_t=${d.n:0.0f} appointments\n\n')
     
         ## Calculate cdf
     
@@ -210,11 +211,11 @@ class BinomialBias(sc.prettyobj):
         if d.actual <= d.expected:
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
-            label = '$P(n ≤ n_A)$'
+            label = '$P(n ≤ n_a)$'
         else:
             rarea = d.x[d.x>=d.actual]
             yarea = d.e_pmf[d.x>=d.actual]
-            label = '$P(n ≥ n_A)$'
+            label = '$P(n ≥ n_a)$'
             
         if d.expected < d.n/2:
             xtext = d.n*0.9
@@ -223,7 +224,8 @@ class BinomialBias(sc.prettyobj):
             xtext = d.n*0.1
             ha = 'left'
             
-        label += f' = {d.cumprob:0.3f}'
+        cumstr = f'{d.cumprob:0.3g}'
+        label += f' = {cumstr}'
         label += '\n'
         label += f'Bias = {d.bias:0.3n}'
     
@@ -247,12 +249,14 @@ class BinomialBias(sc.prettyobj):
         else:
             fairx = d.n*0.1
             ha = 'left'
-        futurestr = '$P_{future}$'
+        futurestr = '$P_{fut}$'
         pl.text(fairx, a_max, f'{futurestr} = {d.p_future:0.3f}', c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
         
         
         dw = barkw.width/2
         for i,ax in enumerate([ax1, ax2]):
+            
+            # Set axis labels
             if   d.n <=  10: loc = mpl.ticker.MultipleLocator(1)
             elif d.n <=  20: loc = mpl.ticker.MultipleLocator(2)
             elif d.n <=  50: loc = mpl.ticker.MultipleLocator(5)
@@ -262,7 +266,7 @@ class BinomialBias(sc.prettyobj):
             ax.set_xlim([0-dw, d.n+dw])
             sc.boxoff(ax)
             
-            ## Plot 95% CI  values
+            # Plot 95% CI  values
             if i == 0:
                 low  = d.expected_low
                 high = d.expected_high
@@ -280,16 +284,22 @@ class BinomialBias(sc.prettyobj):
             ax.scatter(val, 1.2*vmax, 70, c=ci_color)
             ax.text(val, 1.3*vmax,'95% CI', c=ci_color, horizontalalignment='center')
             
+            # Print text
             dy = 0.05*max(pmf)
             ire = int(np.round(d.expected))
             ira = int(np.round(d.actual))
             gap = abs(ire - ira) > d.n/20 # Don't plot both if they're too close together
             if gap or i == 0:
-                ax.text(ire, dy+pmf[ire],'$n_E$', **textkw)
+                ax.text(ire, dy+pmf[ire],'$n_e$', **textkw)
             if gap or i == 1: 
-                ax.text(ira, dy+pmf[ira],'$n_A$', **textkw)
+                ax.text(ira, dy+pmf[ira],'$n_a$', **textkw)
             
             ax.set_aspect(d.n/vmax*0.3)
+            
+        # Add frame labels
+        if letters:
+            for label,y in zip(['(a)','(b)'], [1, 0.5]):
+                fig.text(0.03, y-0.05, label, fontsize=14)
         
         if show:
             pl.show()
