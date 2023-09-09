@@ -86,7 +86,7 @@ def server(inputdict, output, session):
     slider_keys = ['nt', 'ne', 'na']
     text_keys = ['nt2', 'fe', 'fa']
     ui_keys = slider_keys + text_keys
-    global g
+
     g = sc.objdict()
     g.nt = default_nt
     g.ne = default_ne
@@ -97,18 +97,17 @@ def server(inputdict, output, session):
     
     def n_to_f():
         """ Convert from numbers to fractions """
-        global g
         g.fe = g.ne/g.nt
         g.fa = g.na/g.nt
         return
     
     def f_to_n():
         """ Convert from fractions to numbers """
-        global g
         g.ne = g.nt*g.fe
         g.na = g.nt*g.fa
         return
     
+    # @sh.reactive.Effect
     def get_ui():
         """ Get all values from the UI """
         d = sc.objdict()
@@ -123,61 +122,49 @@ def server(inputdict, output, session):
     
     def reconcile_inputs(max_tries=5):
         """ Reconcile the input from the sliders and text boxes """
-        global g
         sc.heading('Starting to reconcile inputs!')
-        count = 0
-        while count <= max_tries:
-            count += 1
-            d = get_ui()
-            print(f'Current UI state on count {count}:\n{d}')
-            not_reconciled = {}
-            for k,v in d.items():
-                print(f'Working on {k}: g = {g[k]}, v = {v}')
-                if g[k] != v:
-                    not_reconciled[k] = [g[k], v]
-                    # g[k] = v # Always set the current key to the current value
-                    if k == 'nt':
-                        g.nt = v
-                        g.nt2 = v
-                        n_to_f()
-                    elif k == 'nt2':
-                        g.nt = v
-                        g.nt2 = v
-                        # n_to_f()
-                    elif k == 'ne':
-                        g.ne = v
-                        # n_to_f()
-                    elif k == 'na':
-                        g.na = v
-                        # n_to_f()
-                    elif k == 'fe':
-                        g.fe = v
-                        f_to_n()
-                    elif k == 'fa':
-                        g.fa = v
-                        f_to_n()
+        d = get_ui()
+        print(f'Current UI state:\n{d}')
+        not_reconciled = {}
+        for k,v in d.items():
+            print(f'Working on {k}: g = {g[k]}, v = {v}')
+            if g[k] != v:
+                not_reconciled[k] = [g[k], v]
+                g[k] = v # Always set the current key to the current value
+                if k == 'nt':
+                    g.nt2 = v
+                    n_to_f()
+                elif k == 'nt2':
+                    g.nt2 = v
+                    n_to_f()
+                elif k == 'ne': n_to_f()
+                elif k == 'na': n_to_f()
+                elif k == 'fe': f_to_n()
+                elif k == 'fa': f_to_n()
             
-            # Reset the UI based on the global dict, and break if it's reconciled
-            print(f'WHAT EVEN AM I\n{g}')
-            set_ui(g)
-            if len(not_reconciled):
-                print(f'Not reconciled after {count} tries:\n{not_reconciled}')
-            else:
-                print(f'Reconciled after {count} tries:\n{g}')
+            
+                # Reset the UI based on the global dict, and break if it's reconciled
+                print(f'WHAT EVEN AM I\n{g}')
+                set_ui()
                 break
+            # if len(not_reconciled):
+            #     print(f'Not reconciled after {count} tries:\n{not_reconciled}')
+            # else:
+            #     print(f'Reconciled after {count} tries:\n{g}')
+            #     break
         
         sc.heading('Done reconciling inputs.')
                     
         return
         
     
-    def set_ui(thisg):
+    def set_ui():
         """ Update the UI """
         print(f'Updating UI to\n{g}')
         for key in slider_keys:
-            ui.update_slider(key, value=thisg[key])
+            ui.update_slider(key, value=g[key])
         for key in text_keys:
-            ui.update_text(key, value=thisg[key])
+            ui.update_text(key, value=g[key])
         return
     
     
