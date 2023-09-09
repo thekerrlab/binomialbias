@@ -144,13 +144,13 @@ def server(inputdict, output, session):
             if not sc.approx(g[k], v): # Avoid floating point errors
                 not_reconciled[k] = [g[k], v]
                 g[k] = v # Always set the current key to the current value
-                if k == 'nt':
+                if k in ['nt', 'ntt']:
+                    v = round(v) # Let's not allow fractional total appointments
+                    g.nt = v
                     g.ntt = v
                     n_to_f()
-                if k == 'ntt':
-                    g.nt = v
-                    n_to_f()
-                    check_sliders()
+                    if k == 'ntt':
+                        check_sliders()
                 elif k in ['ne', 'na']:
                     n_to_f()
                 elif k in ['fe', 'fa']:
@@ -180,7 +180,7 @@ def server(inputdict, output, session):
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs()
-        bb = main.BinomialBias(n=g.ntt, expected=g.fe, actual=g.fa)
+        bb = main.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         bb.plot(show=False, letters=False)
         return
 

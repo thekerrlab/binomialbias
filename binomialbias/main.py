@@ -14,7 +14,7 @@ __all__ = ['BinomialBias', 'plot_bias']
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=20, expected=10, actual=7, display=False, plot=False):
+    def __init__(self, n=20, expected=10, actual=7, f_e=None, f_a=None, display=False, plot=False):
         '''
         Analysis for the paper "Quantitative assessment of discrimination in 
         appointments to senior Australian university positions" -
@@ -25,6 +25,8 @@ class BinomialBias(sc.prettyobj):
             n (int): The total number of appointments
             expected (int/float): Expected appointments of a group given a fair process (either proportion or total number)
             actual (int/float): Actual number appointments of a group (either proportion or total number)
+            f_e (float): Explicitly specify the fraction of expected appointments
+            f_a (float): Explicitly specify the fraction of actual appointments
             display (bool): whether to display the results
             plot (bool): whether to plot the results
             
@@ -46,8 +48,11 @@ class BinomialBias(sc.prettyobj):
             return (val <= 1) and isinstance(val, float)
         
         # Handle inputs
-        if is_prop(actual):   actual   *= n
+        if f_e is not None: expected = f_e*n
+        if f_a is not None: actual   = f_a*n
         if is_prop(expected): expected *= n
+        if is_prop(actual):   actual   *= n
+        
         self.n        = n
         self.actual   = actual
         self.expected = expected
@@ -91,10 +96,10 @@ class BinomialBias(sc.prettyobj):
         expect = self.expected
         
         x     = np.arange(n+1) # X-axis: all possible samples
-        eprop = expect/n # Expected proportion of target group
-        aprop = actual/n # Actual proportion of target group
-        e_pmf = st.binom.pmf(x, n, eprop) # Binomial distribution
-        a_pmf = st.binom.pmf(x, n, aprop)
+        f_e = expect/n # Expected proportion of target group
+        f_a = actual/n # Actual proportion of target group
+        e_pmf = st.binom.pmf(x, n, f_e) # Binomial distribution
+        a_pmf = st.binom.pmf(x, n, f_a)
     
         # Calculation of the preference ratio
         # (n-actual)/(n-expected) - ratio for other group
@@ -109,16 +114,16 @@ class BinomialBias(sc.prettyobj):
             cumprob = sum(e_pmf[x>=actual])
         
         # Gaussian CI approximation
-        e_mean = n*eprop
-        e_std = np.sqrt(e_mean*(1-eprop))
+        e_mean = n*f_e
+        e_std = np.sqrt(e_mean*(1-f_e))
 
         # Calculate bounds
         e_low  = int(max(0, np.ceil(e_mean-2*e_std)))
         e_high = int(min(n, np.floor(e_mean+2*e_std)))
 
         ## Actual
-        a_mean = n*aprop
-        a_std  = np.sqrt(a_mean*(1-aprop))
+        a_mean = n*f_a
+        a_std  = np.sqrt(a_mean*(1-f_a))
 
         # Calculate bounds
         a_low  = int(max(0, np.ceil(a_mean-2*a_std)))
