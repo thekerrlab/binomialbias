@@ -42,6 +42,7 @@ fe_str = ui.HTML('Expected fraction (<i>f<sub>e</sub></i>)')
 fa_str = ui.HTML('Actual fraction (<i>f<sub>a</sub></i>)')
 pagestyle = {"style": "margin-top: 2rem"} # Increase spacing at the top
 flex = {"style": "display: flex; gap: 2rem"}
+flexwrap = {"style": "display: flex; flex-wrap: wrap"}
 
 # Define the defaults
 nmin = 0
@@ -75,9 +76,9 @@ app_ui = ui.page_fluid(pagestyle,
             ui.div(flex, wg.na, wg.fa),
         ),
         ui.panel_main(
-            ui.div(flex,
-                ui.div(
-                    ui.output_plot('plot_bias', width='40vw', height='40vw'),
+            ui.div(flexwrap,
+                ui.div({'style': 'width: 60vw; min-width: 400px; max-width: 1200px'},
+                    ui.output_plot('plot_bias', width='100%', height='800px'),
                     ui.input_checkbox("show", "Show statistics", False),
                 ),
                 ui.div(

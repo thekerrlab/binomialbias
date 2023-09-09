@@ -1,6 +1,6 @@
-'''
+"""
 Generate the figures from the manuscript
-'''
+"""
 
 import sciris as sc
 import pylab as pl
@@ -19,14 +19,14 @@ def make_fig(label, n, e, a):
 
 
 def make_figs():
-    ''' Make all figures for the paper '''
+    """ Make all figures for the paper """
     figs = dict(
-        fig1 = [10, 1/2, 2], # Coin toss
-        fig2 = [12, 1/6, 2], # Die roll
+        fig1 = [10, 1/2, 2],   # Coin toss
+        fig2 = [12, 1/6, 2],   # Die roll
         fig3 = [40, 0.50, 13], # Sexism -- VC
-        fig4 = [40, 0.50, 1], # Racism -- VC
+        fig4 = [40, 0.50, 1],  # Racism -- VC
         fig5 = [39, 0.50, 19], # Sexism -- combined
-        fig6 = [38, 0.38, 2], # Racism -- combined
+        fig6 = [38, 0.38, 2],  # Racism -- combined
     )
     
     for fig,(n,e,a) in figs.items():
