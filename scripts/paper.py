@@ -12,7 +12,7 @@ do_close = False
 
 def make_fig(label, n, e, a):
     B = bb.BinomialBias(n=n, expected=e, actual=a)
-    B.plot(show=False, figkw=dict(figsize=(7,7)))
+    B.plot(show=False, letters=True, figkw=dict(figsize=(7,7)))
     if do_save:
         sc.savefig(f'{label}.png')
     return
@@ -41,7 +41,6 @@ def make_figs():
         
     return
     
-
 
 if __name__ == '__main__':
     make_figs()
