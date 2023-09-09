@@ -170,7 +170,10 @@ class BinomialBias(sc.prettyobj):
     
     def to_df(self):
         """ Convert to a dataframe """
-        return sc.dataframe.from_dict(self.results, orient='index')
+        df = sc.dataframe.from_dict(self.results, orient='index')
+        df = df.reset_index()
+        df = df.rename(columns={'index':'Parameter', 0:'Value'})
+        return df
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
@@ -202,7 +205,7 @@ class BinomialBias(sc.prettyobj):
         too_many = d.n > max_bars # Check if we're asked to plot too many bars
         
 
-        #%% Create the figure
+        # Create the figure
         if fig is None:
             fig = pl.figure(**figkw)
         pl.subplots_adjust(**layoutkw)

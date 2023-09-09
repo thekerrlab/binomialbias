@@ -73,11 +73,13 @@ app_ui = ui.page_fluid(pagestyle,
             ui.div(flex, wg.nt, wg.ntt),
             ui.div(flex, wg.ne, wg.fe),
             ui.div(flex, wg.na, wg.fa),
-            ui.h4('Results'),
-            ui.output_table('results')
+            
+            
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
+            ui.h4('Statistics'),
+            ui.output_table('results'),
         ),
     ),
     title = 'BinomialBias',
