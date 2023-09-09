@@ -76,12 +76,10 @@ app_ui = ui.page_fluid(pagestyle,
         ),
         ui.panel_main(
             ui.div(flex,
-                # ui.div({'style': 'height: 1500px; width: 90%'},
-                ui.output_plot('plot_bias', width='800px', height='800px'),
-                # ),
-                ui.div(#{'style': 'width: 10%'},
-                    ui.h4('Statistics'),
-                    ui.output_table('results'),
+                ui.output_plot('plot_bias', width='40vw', height='40vw'),
+                ui.div(
+                    ui.h5('Statistics'),
+                    ui.output_table('results', fontsize=6),
                 ),
             )
         ),
