@@ -77,7 +77,7 @@ app_ui = ui.page_fluid(pagestyle,
         ),
         ui.panel_main(
             ui.div(flexwrap,
-                ui.div({'style': 'width: 60vw; min-width: 400px; max-width: 1200px'},
+                ui.div({'style': 'width: 50vw; min-width: 400px; max-width: 1200px'},
                     ui.output_plot('plot_bias', width='100%', height='800px'),
                     ui.input_checkbox("show", "Show statistics", False),
                 ),
