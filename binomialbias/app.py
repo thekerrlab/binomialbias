@@ -76,10 +76,15 @@ app_ui = ui.page_fluid(pagestyle,
         ),
         ui.panel_main(
             ui.div(flex,
-                ui.output_plot('plot_bias', width='40vw', height='40vw'),
                 ui.div(
-                    ui.h5('Statistics'),
-                    ui.output_table('results', fontsize=6),
+                    ui.output_plot('plot_bias', width='40vw', height='40vw'),
+                    ui.input_checkbox("show", "Show statistics", False),
+                ),
+                ui.div(
+                    ui.panel_conditional("input.show",
+                        ui.h4('Statistics'),
+                        ui.output_table('results'),
+                    ),
                 ),
             )
         ),
