@@ -50,7 +50,7 @@ slider_max = 1_000_000
 default_nt = 20
 default_ne = 10
 default_na = 7
-width = '40%'
+width = '50%'
 
 # Define the widgets
 wg = sc.objdict()
@@ -79,7 +79,7 @@ app_ui = ui.page_fluid(pagestyle,
             ui.input_checkbox("show", "Show statistics", False),
             ui.panel_conditional("input.show",
                 ui.h4('Statistics'),
-                ui.output_table('plot_bias'),
+                ui.output_table('results'),
             ),
         ),
     ),
@@ -187,21 +187,21 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.plot(alt='Bias distributions')
-    @sh.render.table
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs()
         bb = make_bias()
         bb.plot(show=False, letters=False)
-        # g.df = 
+        g.df = bb.to_df()
+        return
+    
+    @output
+    @sh.render.table
+    def results():
+        """ Create a dataframe of the results """
+        get_ui() # To make it responsive
+        bb = make_bias()
         return bb.to_df()
-    
-    # @output
-    
-    # def results():
-    #     """ Create a dataframe of the results """
-    #     reconcile_inputs()
-    #     return g.df
 
     return
 
