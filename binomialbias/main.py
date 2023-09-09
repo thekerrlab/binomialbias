@@ -1,6 +1,6 @@
-'''
+"""
 Classes and functions for calculating binomial bias
-'''
+"""
 
 import numpy as np
 import scipy.stats as st
@@ -15,7 +15,7 @@ __all__ = ['BinomialBias', 'plot_bias']
 class BinomialBias(sc.prettyobj):
     
     def __init__(self, n=20, expected=10, actual=7, f_e=None, f_a=None, display=False, plot=False):
-        '''
+        """
         Analysis for the paper "Quantitative assessment of discrimination in 
         appointments to senior Australian university positions" -
         by Prof. P. A. Robinson, School of Physics, University of Sydney;
@@ -41,10 +41,10 @@ class BinomialBias(sc.prettyobj):
             import binomialbias as bb
             B = bb.BinomialBias(n=9, expected=4, actual=3)
             B.plot()
-        '''
+        """
         
         def is_prop(val):
-            ''' Check if a value is a proportion or an absolute number '''
+            """ Check if a value is a proportion or an absolute number """
             return (val <= 1) and isinstance(val, float)
         
         # Handle inputs
@@ -71,7 +71,7 @@ class BinomialBias(sc.prettyobj):
 
     
     def validate(self):
-        ''' Validate the inputs; called automatically on initialization '''
+        """ Validate the inputs; called automatically on initialization """
         if self.n < 2:
             errormsg = 'There must be ≥2 appointments'
             raise ValueError(errormsg)
@@ -88,7 +88,7 @@ class BinomialBias(sc.prettyobj):
     
     
     def calculate(self):
-        ''' Calculate the statistics; called automatically on initialization '''
+        """ Calculate the statistics; called automatically on initialization """
         
         # Shorten variables
         n      = self.n
@@ -163,14 +163,19 @@ class BinomialBias(sc.prettyobj):
     
     
     def display(self):
-        ''' Display the results of the calculation '''
+        """ Display the results of the calculation """
         print(self.results)
         return
+    
+    
+    def to_df(self):
+        """ Convert to a dataframe """
+        return sc.dataframe.from_dict(self.results, orient='index')
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
              fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, max_bars=1000):
-        '''
+        """
         Plot the results of the bias calculation
         
         Args:
@@ -185,7 +190,7 @@ class BinomialBias(sc.prettyobj):
             textkw: a dictionary of keyword arguments for the text (passed to pl.text())
             show: whether or not to show the figure
             max_bars: the maximum number of bars to show (else just plot the text)
-        '''
+        """
         
         # Shorten variables into a data dict
         d = sc.mergedicts(self.results, self.plot_results)
