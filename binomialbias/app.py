@@ -92,6 +92,10 @@ def server(input, output, session):
     g.fe = g.ne/g.nt
     g.fa = g.na/g.nt
     
+    def reconcile_inputs():
+        """ Reconcile the input from the sliders and text boxes """
+        
+    
     def set_ui():
         """ Update the UI """
         for key in slider_keys:
@@ -99,7 +103,7 @@ def server(input, output, session):
         for key in text_keys:
             ui.update_text(key, value=g[key])
         return
-        
+    
     
     @sh.reactive.Effect()
     def reconcile_nt():
@@ -120,24 +124,18 @@ def server(input, output, session):
         d.na = input.na()
         return d
             
-    def update_texts():
+    # def update_texts():
         
-        ui.update_text('nt2', value=input.nt())
-        ui.update_text('fe', value=input.nt())
-        return
+    #     ui.update_text('nt2', value=input.nt())
+    #     ui.update_text('fe', value=input.nt())
+    #     return
     
     @output
     @sh.render.plot(alt='Bias distributions')
     def plot_bias():
-        d = get_n()
-        # n = input.nt()
-        # e = input.ne()
-        # a = input.na()
-        if g.first:
-            update_texts()
-            g.first = False
-        n2 = input.nt2()
-        main.plot_bias(n=d.nt, expected=d.ne, actual=d.na, show=False, display=False, letters=False, tmp=n2)
+        reconcile_inputs()
+        set_ui()
+        main.plot_bias(n=g.nt, expected=g.fe, actual=g.fa, show=False, display=False, letters=False)
         return
 
     return
