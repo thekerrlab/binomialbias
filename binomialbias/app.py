@@ -135,24 +135,16 @@ def server(inputdict, output, session):
                     g.nt2 = v
                     n_to_f()
                 elif k == 'nt2':
-                    g.nt2 = v
+                    g.nt = v
                     n_to_f()
                 elif k == 'ne': n_to_f()
                 elif k == 'na': n_to_f()
                 elif k == 'fe': f_to_n()
                 elif k == 'fa': f_to_n()
-            
-            
-                # Reset the UI based on the global dict, and break if it's reconciled
-                print(f'WHAT EVEN AM I\n{g}')
-                set_ui()
                 break
-            # if len(not_reconciled):
-            #     print(f'Not reconciled after {count} tries:\n{not_reconciled}')
-            # else:
-            #     print(f'Reconciled after {count} tries:\n{g}')
-            #     break
         
+        print(f'WHAT EVEN AM I\n{g}')
+        set_ui()
         sc.heading('Done reconciling inputs.')
                     
         return
