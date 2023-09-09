@@ -73,13 +73,14 @@ app_ui = ui.page_fluid(pagestyle,
             ui.div(flex, wg.nt, wg.ntt),
             ui.div(flex, wg.ne, wg.fe),
             ui.div(flex, wg.na, wg.fa),
-            
-            
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
-            ui.h4('Statistics'),
-            ui.output_table('results'),
+            ui.input_checkbox("show", "Show statistics", False),
+            ui.panel_conditional("input.show",
+                ui.h4('Statistics'),
+                ui.output_table('plot_bias'),
+            ),
         ),
     ),
     title = 'BinomialBias',
@@ -186,19 +187,21 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.plot(alt='Bias distributions')
+    @sh.render.table
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs()
         bb = make_bias()
         bb.plot(show=False, letters=False)
-        return
-    
-    @output
-    @sh.render.table
-    def results():
-        """ Create a dataframe of the results """
-        bb = make_bias()
+        # g.df = 
         return bb.to_df()
+    
+    # @output
+    
+    # def results():
+    #     """ Create a dataframe of the results """
+    #     reconcile_inputs()
+    #     return g.df
 
     return
 
