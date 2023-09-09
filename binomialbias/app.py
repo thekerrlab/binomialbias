@@ -92,8 +92,22 @@ def server(input, output, session):
     g.fe = g.ne/g.nt
     g.fa = g.na/g.nt
     
+    def get_ui():
+        d = sc.objdict()
+        d.nt = input.nt()
+        d.ne = input.ne()
+        d.na = input.na()
+        
+        return d
+        
+    
     def reconcile_inputs():
         """ Reconcile the input from the sliders and text boxes """
+        d = get_ui()
+        for k,v in d.items():
+            if g[k] != v:
+                g[k] = v
+        return
         
     
     def set_ui():
@@ -117,12 +131,8 @@ def server(input, output, session):
             print('NOT VALID UPDATE', E)
         return
     
-    def get_n():
-        d = sc.objdict()
-        d.nt = input.nt()
-        d.ne = input.ne()
-        d.na = input.na()
-        return d
+    # def get_n():
+
             
     # def update_texts():
         
