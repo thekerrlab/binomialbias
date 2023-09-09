@@ -164,7 +164,7 @@ class BinomialBias(sc.prettyobj):
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
-             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, tmp=None):
+             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, max_bars=1000):
         '''
         Plot the results of the bias calculation
         
@@ -179,6 +179,7 @@ class BinomialBias(sc.prettyobj):
             layoutkw: a dictionary of keyword arguments for the figure layout (passed to pl.subplots_adjust())
             textkw: a dictionary of keyword arguments for the text (passed to pl.text())
             show: whether or not to show the figure
+            max_bars: the maximum number of bars to show (else just plot the text)
         '''
         
         # Shorten variables into a data dict
@@ -188,6 +189,7 @@ class BinomialBias(sc.prettyobj):
         bbkw   = dict(facecolor='w', alpha=0.7, edgecolor='none') # For the text bounding box
         figkw  = sc.mergedicts(dict(figsize=(8,8)), figkw)
         layoutkw = sc.mergedicts(dict(top=0.90, bottom=0.08, right=0.98, hspace=0.6), layoutkw)
+        too_many = d.n > max_bars # Check if we're asked to plot too many bars
         
 
         #%% Create the figure
@@ -197,7 +199,8 @@ class BinomialBias(sc.prettyobj):
     
         ## First figure: binomial distribution of expected appointments
         ax1 = pl.subplot(2,1,1)
-        pl.bar(d.x, d.e_pmf, facecolor=dist_color, **barkw)
+        if not too_many:
+            pl.bar(d.x, d.e_pmf, facecolor=dist_color, **barkw)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
@@ -231,15 +234,17 @@ class BinomialBias(sc.prettyobj):
         label += f'{plabel} = {d.cumprob:0.3g}\n'
         label += f'$B$ = {d.bias:0.3n}'
     
-        pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
+        if not too_many:
+            pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)
         pl.text(xtext, e_max*1.2, label, c=ci_color, horizontalalignment=ha, verticalalignment='top').set_bbox(bbkw)
     
     
         ## Second plot: if we kept sampling from this distribution    
         ax2 = pl.subplot(2,1,2)
     
-        pl.bar(d.x, d.a_pmf, facecolor=dist_color, **barkw)
-        pl.bar(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], facecolor=cdf_color, **barkw)
+        if not too_many:
+            pl.bar(d.x, d.a_pmf, facecolor=dist_color, **barkw)
+            pl.bar(d.x[d.expected_low:d.expected_high+1], d.a_pmf[d.expected_low:d.expected_high+1], facecolor=cdf_color, **barkw)
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
@@ -274,13 +279,13 @@ class BinomialBias(sc.prettyobj):
                 high = d.expected_high
                 val  = d.expected
                 vmax = e_max
-                pmf = d.e_pmf
+                pmf  = d.e_pmf
             else:
                 low  = d.actual_low
                 high = d.actual_high
                 val  = d.actual
                 vmax = a_max
-                pmf = d.a_pmf
+                pmf  = d.a_pmf
             ax.fill_between([low-dw, high+dw], [1.2*vmax]*2, facecolor=ci_color, zorder=-10, alpha=0.05)
             ax.plot([low-dw, high+dw], [1.2*vmax]*2, c=ci_color, lw=2.0)
             ax.scatter(val, 1.2*vmax, 70, c=ci_color)
@@ -303,9 +308,9 @@ class BinomialBias(sc.prettyobj):
             for label,y in zip(['(a)','(b)'], [1, 0.5]):
                 fig.text(0.03, y-0.05, label, fontsize=14)
                 
-        # Add temp label
-        if tmp:
-            fig.text(0.5, 0.5, str(tmp))
+        # Show a warning if too many bars
+        if too_many:
+            fig.text(0.5, 0.7, f'Cannot show bar chart for $n_t$ > {max_bars}', horizontalalignment='center', fontsize=14)
         
         if show:
             pl.show()
@@ -313,16 +318,14 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True, tmp=None):
-    '''
-    Script to simply plot the bias without creating a class instance; see BinomialBias for arguments
-    '''
-    B = BinomialBias(n=n, expected=expected, actual=actual)
-    B.plot(show=show, letters=letters, tmp=tmp)
+def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True, **kwargs):
+    """ Script to simply plot the bias without creating a class instance; see BinomialBias for arguments """
+    bb = BinomialBias(n=n, expected=expected, actual=actual)
+    bb.plot(show=show, letters=letters, **kwargs)
     if display:
-        B.display()
-    return B
+        bb.display()
+    return bb
 
 
 if __name__ == '__main__':
-    B = plot_bias()
+    bb = plot_bias()

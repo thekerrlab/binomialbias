@@ -10,6 +10,7 @@ import sciris as sc
 sys.path.append(sc.thisdir())
 
 # Import components
+import numpy as np
 import sciris as sc
 import shiny as sh
 from shiny import ui
@@ -42,13 +43,25 @@ fa_str = ui.HTML('Actual fraction (<i>f<sub>a</sub></i>)')
 pagestyle = {"style": "margin-top: 2rem"} # Increase spacing at the top
 flex = {"style": "display: flex; gap: 2rem"}
 
+# Define the defaults
 nmin = 0
 nmax = 100
-slider_max = 2000
+slider_max = 1_000_000
 default_nt = 20
 default_ne = 10
 default_na = 7
 width = '40%'
+
+# Define the widgets
+wg = sc.objdict()
+wg.nt  = ui.input_slider('nt', label=nt_str, min=nmin, max=nmax, value=default_nt)
+wg.ne  = ui.input_slider('ne', label=ne_str, min=nmin, max=nmax, value=default_ne)
+wg.na  = ui.input_slider('na', label=na_str, min=nmin, max=nmax, value=default_na)
+wg.ntt = ui.input_text('ntt', '(or type any value)', width=width)
+wg.fe  = ui.input_text('fe', label=fe_str, width=width)
+wg.fa  = ui.input_text('fa', label=fa_str, width=width)
+
+# Define the app layout
 app_ui = ui.page_fluid(pagestyle,
     ui.layout_sidebar(
         ui.panel_sidebar(
@@ -57,18 +70,9 @@ app_ui = ui.page_fluid(pagestyle,
             ui.HTML(desc),
             ui.hr(),
             ui.h4('Inputs'),
-            ui.div(flex,
-                ui.input_slider('nt', label=nt_str, min=nmin, max=nmax, value=default_nt),
-                ui.input_text('nt2', '(or type any value)', width=width),
-            ),
-            ui.div(flex,
-                ui.input_slider('ne', label=ne_str, min=nmin, max=nmax, value=default_ne),
-                ui.input_text('fe', label=fe_str, width=width),
-            ),
-            ui.div(flex,
-                ui.input_slider('na', label=na_str, min=nmin, max=nmax, value=default_na),
-                ui.input_text('fa', label=fa_str, width=width),
-            ),
+            ui.div(flex, wg.nt, wg.ntt),
+            ui.div(flex, wg.ne, wg.fe),
+            ui.div(flex, wg.na, wg.fa),
         ),
         ui.panel_main(
             ui.output_plot('plot_bias', width='100%', height='100%'),
@@ -85,7 +89,7 @@ def server(inputdict, output, session):
     
     # Set the slider
     slider_keys = ['nt', 'ne', 'na']
-    text_keys = ['nt2', 'fe', 'fa']
+    text_keys = ['ntt', 'fe', 'fa']
     ui_keys = slider_keys + text_keys
 
     # Set global dictionary defaults
@@ -93,7 +97,7 @@ def server(inputdict, output, session):
     g.nt = default_nt
     g.ne = default_ne
     g.na = default_na
-    g.nt2 = default_nt
+    g.ntt = default_nt
     g.fe = g.ne/g.nt
     g.fa = g.na/g.nt
     
@@ -124,6 +128,13 @@ def server(inputdict, output, session):
         print(f'Current UI state:\n{d}')
         return d
     
+    def check_sliders():
+        """ Check that slider ranges are OK, and update if needed """
+        new_max = np.median([nmax, g.ntt, slider_max])
+        for key in slider_keys:
+            ui.update_slider(key, max=new_max)
+        return
+        
     def reconcile_inputs(max_tries=5):
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
@@ -134,21 +145,21 @@ def server(inputdict, output, session):
                 not_reconciled[k] = [g[k], v]
                 g[k] = v # Always set the current key to the current value
                 if k == 'nt':
-                    g.nt2 = v
+                    g.ntt = v
                     n_to_f()
-                elif k == 'nt2':
+                if k == 'ntt':
                     g.nt = v
                     n_to_f()
-                elif k == 'ne': n_to_f()
-                elif k == 'na': n_to_f()
-                elif k == 'fe': f_to_n()
-                elif k == 'fa': f_to_n()
+                    check_sliders()
+                elif k in ['ne', 'na']:
+                    n_to_f()
+                elif k in ['fe', 'fa']:
+                    f_to_n()
                 break
         
         with sh.reactive.isolate():
             set_ui()
         sc.heading('Done reconciling inputs.')
-                    
         return
         
     def set_ui():
@@ -169,7 +180,8 @@ def server(inputdict, output, session):
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs()
-        main.plot_bias(n=g.nt, expected=g.fe, actual=g.fa, show=False, display=False, letters=False)
+        bb = main.BinomialBias(n=g.ntt, expected=g.fe, actual=g.fa)
+        bb.plot(show=False, letters=False)
         return
 
     return
