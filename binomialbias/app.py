@@ -44,7 +44,7 @@ flex = {"style": "display: flex; gap: 2rem"}
 
 nmin = 0
 nmax = 100
-slider_max = 1000 # TODO
+slider_max = 2000
 default_nt = 20
 default_ne = 10
 default_na = 7
@@ -81,12 +81,14 @@ app_ui = ui.page_fluid(pagestyle,
 #%% Define the server
 
 def server(inputdict, output, session):
+    """ The PyShiny server, which includes all the update logic """
     
-    # Set global dictionary defaults
+    # Set the slider
     slider_keys = ['nt', 'ne', 'na']
     text_keys = ['nt2', 'fe', 'fa']
     ui_keys = slider_keys + text_keys
 
+    # Set global dictionary defaults
     g = sc.objdict()
     g.nt = default_nt
     g.ne = default_ne
@@ -107,28 +109,28 @@ def server(inputdict, output, session):
         g.na = g.nt*g.fa
         return
     
-    # @sh.reactive.Effect
     def get_ui():
         """ Get all values from the UI """
         d = sc.objdict()
         for key in ui_keys:
             try:
-                d[key] = float(inputdict[key]())
+                raw = inputdict[key]()
+                v = int(raw) if key in slider_keys else float(raw)
+                d[key] = v
             except:
                 tb = sc.traceback()
                 print(f'Encountered error with input:\n{tb}')
                 d[key] = g[key]
+        print(f'Current UI state:\n{d}')
         return d
     
     def reconcile_inputs(max_tries=5):
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
         d = get_ui()
-        print(f'Current UI state:\n{d}')
         not_reconciled = {}
         for k,v in d.items():
-            print(f'Working on {k}: g = {g[k]}, v = {v}')
-            if g[k] != v:
+            if not sc.approx(g[k], v): # Avoid floating point errors
                 not_reconciled[k] = [g[k], v]
                 g[k] = v # Always set the current key to the current value
                 if k == 'nt':
@@ -143,47 +145,29 @@ def server(inputdict, output, session):
                 elif k == 'fa': f_to_n()
                 break
         
-        print(f'WHAT EVEN AM I\n{g}')
-        set_ui()
+        with sh.reactive.isolate():
+            set_ui()
         sc.heading('Done reconciling inputs.')
                     
         return
         
-    
     def set_ui():
-        """ Update the UI """
+        """ Update the UI, and ensure the dict matches exactly """
         print(f'Updating UI to\n{g}')
         for key in slider_keys:
-            ui.update_slider(key, value=g[key])
+            v = round(g[key])
+            g[key] = v
+            ui.update_slider(key, value=v)
         for key in text_keys:
-            ui.update_text(key, value=g[key])
+            v = float(f'{g[key]:0.3g}')
+            g[key] = v
+            ui.update_text(key, value=v)
         return
-    
-    
-    # @sh.reactive.Effect()
-    # def reconcile_nt():
-    #     x = input.nt2()
-    #     try:
-    #         x = int(x)
-    #         print('UPDATING TO', x)
-    #         ui.update_slider('nt', value=x)
-    #         print('UPDATED TO', x)
-    #     except Exception as E:
-    #         print('NOT VALID UPDATE', E)
-    #     return
-    
-    # def get_n():
-
-            
-    # def update_texts():
-        
-    #     ui.update_text('nt2', value=input.nt())
-    #     ui.update_text('fe', value=input.nt())
-    #     return
     
     @output
     @sh.render.plot(alt='Bias distributions')
     def plot_bias():
+        """ Plot the graphs """
         reconcile_inputs()
         main.plot_bias(n=g.nt, expected=g.fe, actual=g.fa, show=False, display=False, letters=False)
         return
