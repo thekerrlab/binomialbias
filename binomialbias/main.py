@@ -23,12 +23,12 @@ class BinomialBias(sc.prettyobj):
     
         Args:
             n (int): The total number of appointments
-            expected (int/float): Expected appointments of a group given a fair process (either proportion or total number)
-            actual (int/float): Actual number appointments of a group (either proportion or total number)
-            f_e (float): Explicitly specify the fraction of expected appointments
-            f_a (float): Explicitly specify the fraction of actual appointments
-            display (bool): whether to display the results
-            plot (bool): whether to plot the results
+            n_e (int/float): Expected number of appointments of a group given a fair process
+            n_a (int/float): Actual number appointments of a group
+            f_e (float): Explicitly specify the fraction of expected appointments (instead of n_e)
+            f_a (float): Explicitly specify the fraction of actual appointments (instead of n_a)
+            display (bool): whether to display the results (equivalent to calling B.display())
+            plot (bool): whether to plot the results (equivalent to calling B.plot())
             
         Results are stored in "results", which has the following fields:
             ci: 95% confidence interval for individuals given a fair process
@@ -36,11 +36,15 @@ class BinomialBias(sc.prettyobj):
             bias: Preference ratio the estimate of the disparity in how two groups are viewed by selectors
             p_future: Probability of unbiased selection; values much less than 1 do imply bias; values < 0.1 should be cause for serious concern and values < 0.01 should provoke urgent action.
     
-        **Example**::
+        **Examples**::
             
             import binomialbias as bb
+            
             B = bb.BinomialBias(n=9, expected=4, actual=3)
             B.plot()
+            
+            B = bb.BinomialBias(n=155, f_e=0.44, f_a=0.2)
+            B.display()
         """
         
         def is_prop(val):
@@ -168,11 +172,13 @@ class BinomialBias(sc.prettyobj):
         return
     
     
-    def to_df(self):
-        """ Convert to a dataframe """
+    def to_df(self, string=False):
+        """ Convert to a dataframe, optionally casting to string for correct s.f. """
         df = sc.dataframe.from_dict(self.results, orient='index')
         df = df.reset_index()
         df = df.rename(columns={'index':'Parameter', 0:'Value'})
+        if string:
+            df['Value'] = df['Value'].apply(lambda x: f'{x:0.3g}')
         return df
 
 
@@ -217,7 +223,7 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f}) out of $n_t=${d.n:0.0f} appointments\n\n')
+        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f})\nout of $n_t=${d.n:0.0f} appointments\n\n')
     
         ## Calculate cdf
     
@@ -333,12 +339,12 @@ class BinomialBias(sc.prettyobj):
 
 def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True, **kwargs):
     """ Script to simply plot the bias without creating a class instance; see BinomialBias for arguments """
-    bb = BinomialBias(n=n, expected=expected, actual=actual)
-    bb.plot(show=show, letters=letters, **kwargs)
+    B = BinomialBias(n=n, expected=expected, actual=actual)
+    B.plot(show=show, letters=letters, **kwargs)
     if display:
-        bb.display()
-    return bb
+        B.display()
+    return B
 
 
 if __name__ == '__main__':
-    bb = plot_bias()
+    B = plot_bias()

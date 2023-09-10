@@ -199,7 +199,6 @@ def server(inputdict, output, session):
         reconcile_inputs()
         bb = make_bias()
         bb.plot(show=False, letters=False)
-        g.df = bb.to_df()
         return
     
     @output
@@ -208,7 +207,8 @@ def server(inputdict, output, session):
         """ Create a dataframe of the results """
         get_ui() # To make it responsive
         bb = make_bias()
-        return bb.to_df()
+        df = bb.to_df(string=True)
+        return df
 
     return
 
