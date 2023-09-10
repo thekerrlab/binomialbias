@@ -14,7 +14,7 @@ __all__ = ['BinomialBias', 'plot_bias']
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=20, expected=10, actual=7, f_e=None, f_a=None, display=False, plot=False):
+    def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, display=False, plot=False):
         """
         Analysis for the paper "Quantitative assessment of discrimination in 
         appointments to senior Australian university positions" -
@@ -47,16 +47,9 @@ class BinomialBias(sc.prettyobj):
             B.display()
         """
         
-        def is_prop(val):
-            """ Check if a value is a proportion or an absolute number """
-            return (val <= 1) and isinstance(val, float)
-        
         # Handle inputs
         if f_e is not None: expected = f_e*n
         if f_a is not None: actual   = f_a*n
-        if is_prop(expected): expected *= n
-        if is_prop(actual):   actual   *= n
-        
         self.n        = n
         self.actual   = actual
         self.expected = expected
