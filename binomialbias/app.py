@@ -68,7 +68,7 @@ nmin = 0
 nmax = 100
 slider_max = 1_000_000
 width = '50%'
-delay = 0.3 # Wait for user to finish input before updating
+delay = 0.0 # Wait for user to finish input before updating
 
 # Define the widgets
 wg = sc.objdict()
@@ -219,7 +219,7 @@ def server(inputdict, output, session):
     def results():
         """ Create a dataframe of the results """
         show_p = inputdict.show_p()
-        if show_p:
+        if show_p: # Logic for updating to be mostly right, but get_ui() still triggers the plot refresh
             get_ui()
         else:
             reconcile_inputs()
