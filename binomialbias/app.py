@@ -45,7 +45,7 @@ nmin = 0 # Minimum slider value
 nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
 width = '50%' # Width of the text entry boxes
-delay = 0.0 # Optionally wait for user to finish input before updating
+delay = 0.3 # Optionally wait for user to finish input before updating
 
 
 #%% Define the interface
