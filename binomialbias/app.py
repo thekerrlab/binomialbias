@@ -28,7 +28,6 @@ g.na = 7
 g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
-g.iter = sh.reactive.Value(0)
 
 # Set the slider
 slider_keys = ['nt',  'ne', 'na']
@@ -96,11 +95,14 @@ app_ui = ui.page_fluid(pagestyle,
         ui.panel_main(
             ui.div(flexwrap,
                 ui.div(plotwrap,
-                    ui.output_plot('plot_bias', width='100%', height='800px'),
-                    ui.input_checkbox("show", "Show statistics", False),
+                    ui.panel_conditional("input.show_p",
+                        ui.output_plot('plot_bias', width='100%', height='800px'),
+                    ),
+                    ui.input_checkbox("show_p", "Show plot", True),
+                    ui.input_checkbox("show_s", "Show statistics", False),
                 ),
                 ui.div(
-                    ui.panel_conditional("input.show",
+                    ui.panel_conditional("input.show_s",
                         ui.h4('Statistics'),
                         ui.output_table('results'),
                     ),
@@ -151,9 +153,10 @@ def server(inputdict, output, session):
             ui.update_slider(key, max=new_max)
         return
         
-    def reconcile_inputs(u, max_tries=5):
+    def reconcile_inputs():
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
+        u = get_ui()
         for k in ui_keys:
             print(f'{k}: g={g[k]}, u={u[k]}')
         for k in ui_keys:
@@ -175,6 +178,7 @@ def server(inputdict, output, session):
                     f_to_n()
                 break
         
+        # This is here to avoid a potential infinite loop
         with sh.reactive.isolate():
             set_ui(u)
         sc.heading('Done reconciling inputs.')
@@ -187,11 +191,9 @@ def server(inputdict, output, session):
             curr_v = curr[key]
             v = g[key]
             if curr_v != v:
-                print(f'Updating {key}: {curr_v} → {v}')
-                if key in slider_keys:
-                    ui.update_slider(key, value=v)
-                elif key in text_keys:
-                    ui.update_text(key, value=v)
+                print(f'  Updating {key}: {curr_v} → {v}')
+                if   key in slider_keys: ui.update_slider(key, value=v)
+                elif key in text_keys:   ui.update_text(key, value=v)
         return
     
     def make_bias():
@@ -199,50 +201,45 @@ def server(inputdict, output, session):
         bb = main.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
-    def check_stale(u):
-        """ Check if the UI has been updated """
-        print('CHECKING STALE')
-        stale = any([u[k] != g[k] for k in ui_keys])
-        if stale:
-            new_iter = g.iter.get() + 1
-            g.iter.set(new_iter)
-        print("STALE ANSWER IS", stale, g.iter)
-        return stale
+    # def check_stale(u):
+    #     """ Check if the UI has been updated """
+    #     print('CHECKING STALE')
+    #     stale = any([u[k] != g[k] for k in ui_keys])
+    #     if stale:
+    #         new_iter = g.iter.get() + 1
+    #         g.iter.set(new_iter)
+    #     print("STALE ANSWER IS", stale, g.iter)
+    #     return stale
     
-    @sh.reactive.Effect
-    def check():
-        print('I AM CHECK')
-        u = get_ui()
-        stale = check_stale(u)
-        if stale:
-            with sh.reactive.isolate():
-                reconcile_inputs(u)
-        return
+    # @sh.reactive.Effect
+    # def check():
+    #     print('I AM CHECK')
+    #     u = get_ui()
+    #     stale = check_stale(u)
+    #     if stale:
+    #         with sh.reactive.isolate():
+    #             reconcile_inputs(u)
+    #     return
     
     @output
     @sh.render.plot(alt='Bias distributions')
-    @sh.reactive.event(g.iter)
     def plot_bias():
         """ Plot the graphs """
-        print("I AM GRAPHHHHHHHH")
-        # check_stale()
-        # if g.stale:
-        # with sh.reactive.isolate():
-        #     reconcile_inputs()
+        reconcile_inputs()
         bb = make_bias()
         bb.plot(show=False, letters=False)
-        print('DONE GRAPH')
         return
     
     @output
     @sh.render.table
-    @sh.reactive.event(g.iter)
+    # @sh.reactive.Effect
     def results():
         """ Create a dataframe of the results """
-        get_ui()
-        # check_stale()
-        # if g.stale:
-        #     reconcile_inputs()
+        show_p = inputdict.show_p()
+        if show_p:
+            get_ui()
+        else:
+            reconcile_inputs()
         bb = make_bias()
         df = bb.to_df(string=True)
         return df
