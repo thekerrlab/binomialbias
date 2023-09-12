@@ -29,7 +29,8 @@ g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
 g.ui = None
-g.stale = True
+g.stale = sh.reactive.Value(True)
+g.iter = sh.reactive.Value(0)
 
 # Set the slider
 slider_keys = ['nt',  'ne', 'na']
@@ -151,7 +152,8 @@ def server(inputdict, output, session):
             d = get_ui()
         g.stale = any([d[k] != g[k] for k in ui_keys])
         if g.stale:
-            g.pop('fig', None)
+            new_iter = g.iter.get() + 1
+            g.iter.set(new_iter)
         return g.stale
     
     def check_sliders():
@@ -206,8 +208,17 @@ def server(inputdict, output, session):
         bb = main.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
+    @sh.reactive.Effect
+    def check():
+        print('I AM CHECK')
+        stale = check_stale()
+        if stale:
+            reconcile_inputs()
+        return
+    
     @output
     @sh.render.plot(alt='Bias distributions')
+    @sh.reactive.event(g.iter)
     def plot_bias():
         """ Plot the graphs """
         print("I AM GRAPHHHHHHHH")
@@ -222,8 +233,10 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.table
+    @sh.reactive.event(g.iter)
     def results():
         """ Create a dataframe of the results """
+        get_ui()
         # check_stale()
         # if g.stale:
         #     reconcile_inputs()
