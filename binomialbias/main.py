@@ -17,7 +17,6 @@ def to_str(x, sf=3):
     fmt = f'0.{sf}g' # e.g. '0.3g'
     if isinstance(x, str):
         x = to_num(x) # Doesn't matter what we convert it to, the string is the same
-    
     if isinstance(x, float):
         string = f'{x:{fmt}}' # e.g. f'{0.47162:0.3g}'
     else:
