@@ -108,7 +108,7 @@ class BinomialBias(sc.prettyobj):
             errormsg = f'Expected appointments ({self.expected}) must be less than total appointments ({self.n})'
             raise ValueError(errormsg)
         if self.actual > self.n:
-            errormsg = f'Actual appointments ({self.expected}) must be less than or equal to total appointments ({self.n})'
+            errormsg = f'Actual appointments ({self.actual}) must be less than or equal to total appointments ({self.n})'
             raise ValueError(errormsg)
         return
     
