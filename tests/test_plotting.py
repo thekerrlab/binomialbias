@@ -18,7 +18,7 @@ def test_plotting(show=False):
             [ 30, 15, 20],
             [100, 50, 30],
             ]:
-        B = bb.BinomialBias(n=n, expected=e, actual=a)
+        B = bb.BinomialBias(n=n, n_e=e, n_a=a)
         B.plot(show=show)
         out.append(B)
         

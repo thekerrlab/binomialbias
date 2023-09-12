@@ -35,7 +35,7 @@ def to_num(x):
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, display=False, plot=False):
+    def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, display=False, plot=False, **kwargs):
         """
         Analysis for the paper "Quantitative assessment of discrimination in 
         appointments to senior Australian university positions" -
@@ -69,13 +69,19 @@ class BinomialBias(sc.prettyobj):
             B = bb.BinomialBias(n=155, f_e=0.44, f_a=0.2)
             B.display()
         """
+        # Handle deprecations
+        expected = kwargs.pop('expected', n_e)
+        actual   = kwargs.pop('actual', n_a)
+        if 0 < expected < 1: f_e = expected # Treat as fractions
+        if 0 < actual   < 1: f_a = actual
         
         # Handle inputs
         if f_e is not None: expected = f_e*n
         if f_a is not None: actual   = f_a*n
         self.n        = n
-        self.actual   = actual
         self.expected = expected
+        self.actual   = actual
+        
         
         # Perform validation
         self.validate()

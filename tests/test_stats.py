@@ -16,7 +16,7 @@ def test_stats(atol=0.01):
             vcs  = [40, 20, 13],
             sen  = [38, 0.38, 2],
             ).items():
-        B = bb.BinomialBias(n=n, expected=e, actual=a)
+        B = bb.BinomialBias(n=n, n_e=e, n_a=a)
         out[k] = B.results
         
     ## Tests from paper
@@ -46,20 +46,20 @@ def test_invalid():
     out = sc.autolist()
     
     # Zero actual
-    out += bb.BinomialBias(n=10, expected=5, actual=0)
+    out += bb.BinomialBias(n=10, n_e=5, n_a=0)
     
     # Expected is fraction
-    out += bb.BinomialBias(n=11, expected=0.7, actual=4)
+    out += bb.BinomialBias(n=11, f_e=0.7, n_a=4)
     
     # Actual is fraction
-    out += bb.BinomialBias(n=11, expected=0.7, actual=2**(1/2)/2)
+    out += bb.BinomialBias(n=11, f_e=0.7, f_a=2**(1/2)/2)
     
     with pytest.raises(ValueError):
-        bb.BinomialBias(n=0, expected=0, actual=0)
+        bb.BinomialBias(n=0, n_e=0, n_a=0)
     with pytest.raises(ValueError):
-        bb.BinomialBias(n=10, expected=11, actual=5)
+        bb.BinomialBias(n=10, n_e=11, n_a=5)
     with pytest.raises(ValueError):
-        bb.BinomialBias(n=10, expected=5, actual=11)
+        bb.BinomialBias(n=10, n_e=5, n_a=11)
 
     return out
 
