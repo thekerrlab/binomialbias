@@ -12,6 +12,28 @@ import matplotlib as mpl
 __all__ = ['BinomialBias', 'plot_bias']
 
 
+def to_str(x, sf=3):
+    """ Convert a number to a string with specified significant figures """
+    fmt = f'0.{sf}g' # e.g. '0.3g'
+    if isinstance(x, str):
+        x = to_num(x) # Doesn't matter what we convert it to, the string is the same
+    
+    if isinstance(x, float):
+        string = f'{x:{fmt}}' # e.g. f'{0.47162:0.3g}'
+    else:
+        string = str(x) # Handle ints
+        
+    return string
+
+
+def to_num(x):
+    """ Convert a string to a number, handling either ints or floats """
+    if sc.isnumber(x):
+        x = to_str(x)
+    num = float(x) if '.' in x else int(x) # Handle int or float
+    return num
+
+
 class BinomialBias(sc.prettyobj):
     
     def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, display=False, plot=False):
@@ -171,7 +193,7 @@ class BinomialBias(sc.prettyobj):
         df = df.reset_index()
         df = df.rename(columns={'index':'Parameter', 0:'Value'})
         if string:
-            df['Value'] = df['Value'].apply(lambda x: f'{x:0.3g}')
+            df['Value'] = df['Value'].apply(lambda x: to_str(x))
         return df
 
 
@@ -240,11 +262,11 @@ class BinomialBias(sc.prettyobj):
             xtext = d.n*0.1
             ha = 'left'
         
-        label  = f'$f_e$ = {d.f_expected:0.2g}\n'
-        label += f'$f_a$ = {d.f_actual:0.2g}\n'
+        label  = f'$f_e$ = {to_str(d.f_expected, 2)}\n'
+        label += f'$f_a$ = {to_str(d.f_actual, 2)}\n'
         label += '\n'
-        label += f'{plabel} = {d.cumprob:0.3g}\n'
-        label += f'$B$ = {d.bias:0.3n}'
+        label += f'{plabel} = {to_str(d.cumprob)}\n'
+        label += f'$B$ = {to_str(d.bias)}'
     
         if not too_many:
             pl.bar(rarea, yarea, facecolor=cdf_color, **barkw)

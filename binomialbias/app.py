@@ -42,8 +42,9 @@ na_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
 fe_str = ui.HTML('Expected fraction (<i>f<sub>e</sub></i>)')
 fa_str = ui.HTML('Actual fraction (<i>f<sub>a</sub></i>)')
 pagestyle = {"style": "margin-top: 2rem"} # Increase spacing at the top
-flex = {"style": "display: flex; gap: 2rem"}
-flexwrap = {"style": "display: flex; flex-wrap: wrap"}
+flexgap   = {"style": "display: flex; gap: 2rem"}
+flexwrap  = {"style": "display: flex; flex-wrap: wrap"}
+plotwrap  = {'style': 'width: 50vw; min-width: 400px; max-width: 1200px'}
 
 # Define the defaults
 nmin = 0
@@ -53,6 +54,7 @@ default_nt = 20
 default_ne = 10
 default_na = 7
 width = '50%'
+delay = 0.3 # Wait for user to finish input before updating
 
 # Define the widgets
 wg = sc.objdict()
@@ -72,13 +74,13 @@ app_ui = ui.page_fluid(pagestyle,
             ui.HTML(desc),
             ui.hr(),
             ui.h4('Inputs'),
-            ui.div(flex, wg.nt, wg.ntt),
-            ui.div(flex, wg.ne, wg.fe),
-            ui.div(flex, wg.na, wg.fa),
+            ui.div(flexgap, wg.nt, wg.ntt),
+            ui.div(flexgap, wg.ne, wg.fe),
+            ui.div(flexgap, wg.na, wg.fa),
         ),
         ui.panel_main(
             ui.div(flexwrap,
-                ui.div({'style': 'width: 50vw; min-width: 400px; max-width: 1200px'},
+                ui.div(plotwrap,
                     ui.output_plot('plot_bias', width='100%', height='800px'),
                     ui.input_checkbox("show", "Show statistics", False),
                 ),
@@ -128,15 +130,15 @@ def server(inputdict, output, session):
     
     def get_ui():
         """ Get all values from the UI """
+        sc.timedsleep(delay) # Don't update the UI before the user is done
         d = sc.objdict()
         for key in ui_keys:
             try:
                 raw = inputdict[key]()
-                v = int(raw) if key in slider_keys else float(raw)
+                v = main.to_num(raw)
                 d[key] = v
             except:
-                tb = sc.traceback()
-                print(f'Encountered error with input:\n{tb}')
+                print(f'Encountered error with input: {key} = "{raw}", continuing...')
                 d[key] = g[key]
         print(f'Current UI state:\n{d}')
         return d
@@ -155,6 +157,7 @@ def server(inputdict, output, session):
         not_reconciled = {}
         for k,v in d.items():
             if not sc.approx(g[k], v): # Avoid floating point errors
+                print('MISMATCH for', k, g[k], v)
                 not_reconciled[k] = [g[k], v]
                 g[k] = v # Always set the current key to the current value
                 if k in ['nt', 'ntt']:
@@ -183,7 +186,7 @@ def server(inputdict, output, session):
             g[key] = v
             ui.update_slider(key, value=v)
         for key in text_keys:
-            v = float(f'{g[key]:0.3g}')
+            v = float(main.to_str(g[key]))
             g[key] = v
             ui.update_text(key, value=v)
         return
@@ -198,8 +201,9 @@ def server(inputdict, output, session):
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs()
-        bb = make_bias()
-        bb.plot(show=False, letters=False)
+        with sh.reactive.isolate():
+            bb = make_bias()
+            bb.plot(show=False, letters=False)
         return
     
     @output
