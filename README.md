@@ -11,7 +11,7 @@ There are several ways to use this library, described below.
 
 ## Webapp
 
-A live webapp is running at http://binomialbias.sciris.org.
+A live webapp is running at https://binomialbias.sciris.org.
 
 
 ## Local installation and usage
@@ -25,7 +25,9 @@ To use locally with Python, run
 This can then be run via e.g.:
 
     import binomialbias as bb
-    bb.plot_bias(n=9, actual=3, expected=4)
+    bb.plot_bias(n=20, n_e=10, n_a=7)
+
+This example shows the statistics for the case where there were `n = 20` appointments (e.g., the size of a committee), out of which `n_e = 10` people were expected to belong to a given group (e.g., female), and for which `n_a = 7` actually were.
 
 ### Shiny
 
