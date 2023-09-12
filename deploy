@@ -1,10 +1,11 @@
 #!/bin/bash
 # Deploy the Python app to shinyapps.io
+# NOTE: not for external users!
 
-# First:
-# Archive existing app
-# Delete existing app
-# Then run this script
+# Steps to deploy:
+# 1. Archive existing app
+# 2. Delete existing app
+# 3. Run this script
 
 cd binomialbias
 rm -rf rsconnect-python

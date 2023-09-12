@@ -10,17 +10,17 @@ desc     = 'Quantitative assessment of discrimination based on the binomial dist
 url      = 'http://binomialbias.sciris.org',
 keywords = ["binomial distribution", "discrimination", "bias", "sexism", "racism"],
 requires = [
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'sciris',
+    'numpy',
+    'scipy',
+    'matplotlib',
+    'sciris',
 ],
 extras = {
     'app':  [
         'shiny',
         'rsconnect-python',
     ],
-]
+}
 
 
 #%% Below here is boilerplate -- usually does not need to be updated
