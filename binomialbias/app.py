@@ -28,8 +28,6 @@ g.na = 7
 g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
-g.ui = None
-g.stale = sh.reactive.Value(True)
 g.iter = sh.reactive.Value(0)
 
 # Set the slider
@@ -146,16 +144,6 @@ def server(inputdict, output, session):
         print(f'Current UI state:\n{d}')
         return d
     
-    def check_stale(d=None):
-        """ Check if the UI has been updated """
-        if d is None:
-            d = get_ui()
-        g.stale = any([d[k] != g[k] for k in ui_keys])
-        if g.stale:
-            new_iter = g.iter.get() + 1
-            g.iter.set(new_iter)
-        return g.stale
-    
     def check_sliders():
         """ Check that slider ranges are OK, and update if needed """
         new_max = np.median([nmax, g.ntt, slider_max])
@@ -163,18 +151,21 @@ def server(inputdict, output, session):
             ui.update_slider(key, max=new_max)
         return
         
-    def reconcile_inputs(max_tries=5):
+    def reconcile_inputs(u, max_tries=5):
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
-        d = get_ui()
-        for k,v in d.items():
-            if not sc.approx(g[k], v): # Avoid floating point errors
-                print(f'Mismatch for {k}: {g[k]} ≠ {v}')
-                v = main.to_num(v)
-                g[k] = v # Always set the current key to the current value
+        for k in ui_keys:
+            print(f'{k}: g={g[k]}, u={u[k]}')
+        for k in ui_keys:
+            uv = u[k]
+            gv = g[k]
+            if not sc.approx(gv, uv): # Avoid floating point errors
+                print(f'Mismatch for {k}: {gv} ≠ {uv}')
+                uv = main.to_num(uv)
+                g[k] = uv # Always set the current key to the current value
                 if k in ['nt', 'ntt']:
-                    g.nt = v
-                    g.ntt = v
+                    g.nt = uv
+                    g.ntt = uv
                     n_to_f()
                     if k == 'ntt':
                         check_sliders()
@@ -185,7 +176,7 @@ def server(inputdict, output, session):
                 break
         
         with sh.reactive.isolate():
-            set_ui(d)
+            set_ui(u)
         sc.heading('Done reconciling inputs.')
         return
         
@@ -196,7 +187,7 @@ def server(inputdict, output, session):
             curr_v = curr[key]
             v = g[key]
             if curr_v != v:
-                print(f'Updating: {curr_v} → {v}')
+                print(f'Updating {key}: {curr_v} → {v}')
                 if key in slider_keys:
                     ui.update_slider(key, value=v)
                 elif key in text_keys:
@@ -208,12 +199,24 @@ def server(inputdict, output, session):
         bb = main.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
+    def check_stale(u):
+        """ Check if the UI has been updated """
+        print('CHECKING STALE')
+        stale = any([u[k] != g[k] for k in ui_keys])
+        if stale:
+            new_iter = g.iter.get() + 1
+            g.iter.set(new_iter)
+        print("STALE ANSWER IS", stale, g.iter)
+        return stale
+    
     @sh.reactive.Effect
     def check():
         print('I AM CHECK')
-        stale = check_stale()
+        u = get_ui()
+        stale = check_stale(u)
         if stale:
-            reconcile_inputs()
+            with sh.reactive.isolate():
+                reconcile_inputs(u)
         return
     
     @output
