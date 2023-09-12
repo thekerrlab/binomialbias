@@ -44,6 +44,6 @@ The Shiny app can then be run locally via the `run` script.
 ## Structure
 
 - All code for the Python package is in the `binomialbias` folder.
-- The script for generating the figure in the papers is in the `scripts` folder.
+- The script for generating the figure in the paper is in the `scripts` folder.
 - Continuous integration tests are in the `tests` folder.
 - Older Jupyter and Matplotlib versions are available in the `archive` folder.
