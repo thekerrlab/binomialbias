@@ -95,18 +95,7 @@ app_ui = ui.page_fluid(pagestyle,
             ui.div(flexgap, wg.na, wg.fa),
         ),
         ui.panel_main(
-            ui.div(flexwrap,
-                ui.div(plotwrap,
-                    ui.output_plot('plot_bias', width='100%', height='800px'),
-                    ui.input_checkbox("show", "Show statistics", False),
-                ),
-                ui.div(
-                    ui.panel_conditional("input.show",
-                        ui.h4('Statistics'),
-                        ui.output_table('results'),
-                    ),
-                ),
-            )
+            ui.output_ui('everything')
         ),
     ),
     title = 'BinomialBias',
@@ -209,24 +198,48 @@ def server(inputdict, output, session):
     def plot_bias():
         """ Plot the graphs """
         print("I AM GRAPHHHHHHHH")
-        check_stale()
-        if g.stale:
-            with sh.reactive.isolate():
-                reconcile_inputs()
-                bb = make_bias()
-                g.fig = bb.plot(show=False, letters=False)
-                g.stale = False
-        return g.fig
+        # check_stale()
+        # if g.stale:
+        # with sh.reactive.isolate():
+        #     reconcile_inputs()
+        bb = make_bias()
+        fig = bb.plot(show=False, letters=False)
+        return fig
     
     @output
     @sh.render.table
     def results():
         """ Create a dataframe of the results """
         print('I AM TABBLLLLLELEEEEEEE')
-        
+        # check_stale()
+        # if g.stale:
+        #     reconcile_inputs()
         bb = make_bias()
         df = bb.to_df(string=True)
         return df
+    
+    
+    @output
+    @sh.render.ui
+    def everything():
+        check_stale()
+        if g.stale:
+            reconcile_inputs()
+        
+        return ui.TagList(
+            ui.div(flexwrap,
+                ui.div(plotwrap,
+                    ui.output_plot('plot_bias', width='100%', height='800px'),
+                    ui.input_checkbox("show", "Show statistics", False),
+                ),
+                ui.div(
+                    ui.panel_conditional("input.show",
+                        ui.h4('Statistics'),
+                        ui.output_table('results'),
+                    ),
+                ),
+            )
+            )
 
     return
 
