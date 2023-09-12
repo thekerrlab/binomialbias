@@ -28,8 +28,9 @@ on the binomial distribution. It is provided in support of the following paper:<
 <b>Quantitative assessment of discrimination in appointments to senior Australian university positions.</b>
 Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
 <br>
-For more information, please see the <a href="https://github.com/braindynamicsusyd/binomialbias">GitHub repository</a>
-or the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or <a href="mailto:peter.robinson@sydney.edu.au">contact us</a>.<br>
+For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>
+or the <a href="http://binomialbiaspaper.sciris.org">paper</a> (TBC), or 
+<a href="mailto:cliff@thekerrlab.com">contact us</a>.<br>
 <br>
 <i>Version: {version.__version__} ({version.__versiondate__})</i><br>
 </div>
