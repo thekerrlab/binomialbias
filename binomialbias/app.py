@@ -129,24 +129,24 @@ def server(inputdict, output, session):
     
     def f_to_n():
         """ Convert from fractions to numbers """
-        g.ne = bbm.to_num(g.nt*g.fe)
-        g.na = bbm.to_num(g.nt*g.fa)
+        g.ne = round(bbm.to_num(g.nt*g.fe))
+        g.na = round(bbm.to_num(g.nt*g.fa))
         return
     
     def get_ui():
         """ Get all values from the UI """
         sc.timedsleep(delay) # Don't update the UI before the user is done
-        d = sc.objdict()
+        u = sc.objdict()
         for key in ui_keys:
             try:
                 raw = inputdict[key]()
                 v = bbm.to_num(raw)
-                d[key] = v
+                u[key] = v
             except:
                 print(f'Encountered error with input: {key} = "{raw}", continuing...')
-                d[key] = g[key]
-        print(f'Current UI state:\n{d}')
-        return d
+                u[key] = g[key]
+        print(f'Current UI state:\n{u}')
+        return u
     
     def check_sliders():
         """ Check that slider ranges are OK, and update if needed """
@@ -162,11 +162,13 @@ def server(inputdict, output, session):
         for k in ui_keys:
             print(f'{k}: g={g[k]}, u={u[k]}')
         for k in ui_keys:
-            uv = u[k]
             gv = g[k]
-            if not sc.approx(gv, uv): # Avoid floating point errors
+            uv = bbm.to_num(u[k])
+            if k in slider_keys:
+                uv = round(uv)
+            match = sc.approx(gv, uv)
+            if not match: # Avoid floating point errors
                 print(f'Mismatch for {k}: {gv} ≠ {uv}')
-                uv = bbm.to_num(uv)
                 g[k] = uv # Always set the current key to the current value
                 if k in ['nt', 'ntt']:
                     g.nt = uv
