@@ -1,3 +1,31 @@
+"""
+Setup file
+"""
+
+# Define the things that need to be updated
+name     = 'binomialbias',
+author   = 'P.A. Robinson, C. C. Kerr',
+email    = 'cliff@thekerrlab.com',
+desc     = 'Quantitative assessment of discrimination based on the binomial distribution',
+url      = 'http://binomialbias.sciris.org',
+keywords = ["binomial distribution", "discrimination", "bias", "sexism", "racism"],
+requires = [
+        'numpy',
+        'scipy',
+        'matplotlib',
+        'sciris',
+],
+extras = {
+    'app':  [
+        'shiny',
+        'rsconnect-python',
+    ],
+]
+
+
+#%% Below here is boilerplate -- usually does not need to be updated
+
+# Imports
 import os
 import runpy
 from setuptools import setup, find_packages
@@ -12,41 +40,30 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 CLASSIFIERS = [
-    "Environment :: Console",
-    "Intended Audience :: Science/Research",
-    "License :: Other/Proprietary License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Development Status :: 5 - Production/Stable",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    'Environment :: Console',
+    'Intended Audience :: Science/Research',
+    'License :: Other/Proprietary License',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.11',
 ]
 
 setup(
-    name="binomialbias",
+    name=name,
     version=version,
-    author="P.A. Robinson, C. C. Kerr",
-    author_email="peter.robinson@sydney.edu.au",
-    description="Library for quantitative assessment of discrimination",
+    author=author,
+    author_email=email,
+    description=desc,
+    keywords=keywords,
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    url='http://binomialbias.sciris.org',
-    keywords=["binomial distribution", "discrimination", "bias", "sexism", "racism"],
-    platforms=["OS Independent"],
+    long_description_content_type='text/markdown',
+    url=url,
+    platforms=['OS Independent'],
     classifiers=CLASSIFIERS,
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'sciris',
-    ],
-    extras_require={
-        'app':  [
-            'shiny',
-            'rsconnect-python',
-        ],
-    }
+    install_requires=requires,
+    extras_require=extras
 )
