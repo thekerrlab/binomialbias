@@ -28,8 +28,8 @@ g.na = 7
 g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
+g.ui = None
 g.stale = True
-g.fig = None
 
 # Set the slider
 slider_keys = ['nt',  'ne', 'na']
@@ -70,7 +70,7 @@ nmin = 0
 nmax = 100
 slider_max = 1_000_000
 width = '50%'
-delay = 1.0 # Wait for user to finish input before updating
+delay = 0.3 # Wait for user to finish input before updating
 
 # Define the widgets
 wg = sc.objdict()
@@ -95,7 +95,18 @@ app_ui = ui.page_fluid(pagestyle,
             ui.div(flexgap, wg.na, wg.fa),
         ),
         ui.panel_main(
-            ui.output_ui('everything')
+            ui.div(flexwrap,
+                ui.div(plotwrap,
+                    ui.output_plot('plot_bias', width='100%', height='800px'),
+                    ui.input_checkbox("show", "Show statistics", False),
+                ),
+                ui.div(
+                    ui.panel_conditional("input.show",
+                        ui.h4('Statistics'),
+                        ui.output_table('results'),
+                    ),
+                ),
+            )
         ),
     ),
     title = 'BinomialBias',
@@ -121,7 +132,7 @@ def server(inputdict, output, session):
     
     def get_ui():
         """ Get all values from the UI """
-        # sc.timedsleep(delay) # Don't update the UI before the user is done
+        sc.timedsleep(delay) # Don't update the UI before the user is done
         d = sc.objdict()
         for key in ui_keys:
             try:
@@ -213,36 +224,12 @@ def server(inputdict, output, session):
     @sh.render.table
     def results():
         """ Create a dataframe of the results """
-        print('I AM TABBLLLLLELEEEEEEE')
         # check_stale()
         # if g.stale:
         #     reconcile_inputs()
         bb = make_bias()
         df = bb.to_df(string=True)
         return df
-    
-    
-    @output
-    @sh.render.ui
-    def everything():
-        check_stale()
-        if g.stale:
-            reconcile_inputs()
-        
-        return ui.TagList(
-            ui.div(flexwrap,
-                ui.div(plotwrap,
-                    ui.output_plot('plot_bias', width='100%', height='800px'),
-                    ui.input_checkbox("show", "Show statistics", False),
-                ),
-                ui.div(
-                    ui.panel_conditional("input.show",
-                        ui.h4('Statistics'),
-                        ui.output_table('results'),
-                    ),
-                ),
-            )
-            )
 
     return
 
