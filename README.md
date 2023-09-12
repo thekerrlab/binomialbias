@@ -1,6 +1,12 @@
 # Binomial Bias
 
-Library to compute and plot quantitative assessments of discrimination within organizations, based on the binomial distribution.
+[![PyPI](https://badgen.net/pypi/v/binomialbias/?color=blue)](https://pypi.com/project/binomialbias)
+
+[![License](https://img.shields.io/pypi/l/binomialbias.svg)](https://github.com/thekerrlab/binomialbias/blob/main/LICENSE)
+
+[![Tests](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml/badge.svg)](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml?query=workflow)
+
+This library computes and plots quantitative assessments of discrimination within organizations, based on the binomial distribution.
 
 This code supports the following paper:
 
@@ -31,11 +37,11 @@ This example shows the statistics for the case where there were `n = 20` appoint
 
 ### Shiny
 
-To run the Shiny app, clone the repository from GitHub, then install with
+To run the [Shiny](https://shiny.posit.co/py/) app locally, clone the repository from GitHub, then install with
 
     pip install -e .[app]
 
-The PyShiny app can then be run locally via the `run` script.
+The Shiny app can then be run locally via the `run` script.
 
 
 ## Structure
