@@ -203,7 +203,7 @@ class BinomialBias(sc.prettyobj):
         return df
 
 
-    def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True,
+    def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True, wrap=False,
              fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, max_bars=1000):
         """
         Plot the results of the bias calculation
@@ -213,6 +213,7 @@ class BinomialBias(sc.prettyobj):
             cdf_color: the color of the part of the distribution being integrated
             ci_color: the color of the confidence bounds
             letters: if True, show frame labels with letters
+            wrap: if True, wrap the plot title across two lines
             fig: if supplied, plot using this figure
             barkw: a dictionary of keyword arguments for the bar plots (passed to pl.bar())
             figkw: a dictionary of keyword arguments for the figure (passed to pl.figure())
@@ -244,7 +245,8 @@ class BinomialBias(sc.prettyobj):
         pl.xlim([0, d.n])
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
-        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f})\nout of $n_t=${d.n:0.0f} appointments\n\n')
+        sep = '\n' if wrap else ' ' # Choose between line break and space
+        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f}){sep}out of $n_t=${d.n:0.0f} appointments\n\n')
     
         ## Calculate cdf
     

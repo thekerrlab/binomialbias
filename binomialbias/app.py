@@ -242,7 +242,7 @@ def server(inputdict, output, session):
         """ Plot the graphs """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
         bb = make_bias()
-        bb.plot(show=False, letters=False)
+        bb.plot(show=False, letters=False, wrap=True)
         return
     
     @output
