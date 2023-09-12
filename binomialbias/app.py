@@ -29,6 +29,7 @@ g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
 g.stale = True
+g.fig = None
 
 # Set the slider
 slider_keys = ['nt',  'ne', 'na']
@@ -144,8 +145,10 @@ def server(inputdict, output, session):
         print(f'Current UI state:\n{d}')
         return d
     
-    def check_stale(d):
+    def check_stale(d=None):
         """ Check if the UI has been updated """
+        if d is None:
+            d = get_ui()
         g.stale = any([d[k] != g[k] for k in ui_keys])
         return g.stale
     
@@ -205,19 +208,21 @@ def server(inputdict, output, session):
     @sh.render.plot(alt='Bias distributions')
     def plot_bias():
         """ Plot the graphs """
-        stale = check_stale()
+        print("I AM GRAPHHHHHHHH")
+        check_stale()
         if g.stale:
-            # with sh.reactive.isolate():
-            bb = make_bias()
-            bb.plot(show=False, letters=False)
-            g.stale = False
-        return
+            with sh.reactive.isolate():
+                reconcile_inputs()
+                bb = make_bias()
+                g.fig = bb.plot(show=False, letters=False)
+                g.stale = False
+        return g.fig
     
     @output
     @sh.render.table
     def results():
         """ Create a dataframe of the results """
-        reconcile_inputs()
+        print('I AM TABBLLLLLELEEEEEEE')
         
         bb = make_bias()
         df = bb.to_df(string=True)
