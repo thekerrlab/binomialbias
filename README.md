@@ -1,6 +1,6 @@
 # Binomial Bias
 
-[![PyPI](https://badgen.net/pypi/v/binomialbias/?color=blue)](https://pypi.com/project/binomialbias)
+[![PyPI](https://badgen.net/pypi/v/binomialbias/?color=blue)](https://pypi.org/project/binomialbias)
 [![Tests](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml/badge.svg)](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml?query=workflow)
 
 This library computes and plots quantitative assessments of discrimination within organizations, based on the binomial distribution.
