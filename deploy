@@ -7,6 +7,12 @@
 # 2. Delete existing app
 # 3. Run this script
 
+start=$(date +%s)
+
 cd binomialbias
 rm -rf rsconnect-python
 rsconnect deploy shiny . --name sciris --title "binomialbias"
+
+end=$(date +%s)
+
+echo "Done: $(($end-$start)) s"
