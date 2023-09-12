@@ -3,18 +3,18 @@ Setup file
 """
 
 # Define the things that need to be updated
-name     = 'binomialbias',
-author   = 'P.A. Robinson, C. C. Kerr',
-email    = 'cliff@thekerrlab.com',
-desc     = 'Quantitative assessment of discrimination based on the binomial distribution',
-url      = 'http://binomialbias.sciris.org',
-keywords = ["binomial distribution", "discrimination", "bias", "sexism", "racism"],
+name     = 'binomialbias'
+author   = 'P.A. Robinson, C. C. Kerr'
+email    = 'cliff@thekerrlab.com'
+desc     = 'Quantitative assessment of discrimination based on the binomial distribution'
+url      = 'http://binomialbias.sciris.org'
+keywords = ["binomial distribution", "discrimination", "bias", "sexism", "racism"]
 requires = [
     'numpy',
     'scipy',
     'matplotlib',
     'sciris',
-],
+]
 extras = {
     'app':  [
         'shiny',
