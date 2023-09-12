@@ -121,7 +121,7 @@ def server(inputdict, output, session):
     
     def get_ui():
         """ Get all values from the UI """
-        sc.timedsleep(delay) # Don't update the UI before the user is done
+        # sc.timedsleep(delay) # Don't update the UI before the user is done
         d = sc.objdict()
         for key in ui_keys:
             try:
@@ -139,6 +139,8 @@ def server(inputdict, output, session):
         if d is None:
             d = get_ui()
         g.stale = any([d[k] != g[k] for k in ui_keys])
+        if g.stale:
+            g.pop('fig', None)
         return g.stale
     
     def check_sliders():
@@ -203,8 +205,9 @@ def server(inputdict, output, session):
         # with sh.reactive.isolate():
         #     reconcile_inputs()
         bb = make_bias()
-        fig = bb.plot(show=False, letters=False)
-        return fig
+        bb.plot(show=False, letters=False)
+        print('DONE GRAPH')
+        return
     
     @output
     @sh.render.table
