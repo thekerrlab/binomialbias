@@ -14,8 +14,8 @@ import numpy as np
 import sciris as sc
 import shiny as sh
 from shiny import ui
-import version
-import main
+import version as bbv
+import main as bbm
 
 
 #%% Global variables
@@ -29,7 +29,7 @@ g.ntt = g.nt
 g.fe = g.ne/g.nt
 g.fa = g.na/g.nt
 
-# Set the slider
+# Set the component keys
 slider_keys = ['nt',  'ne', 'na']
 text_keys   = ['ntt', 'fe', 'fa']
 ui_keys = slider_keys + text_keys
@@ -48,7 +48,7 @@ For more information, please see the <a href="https://github.com/thekerrlab/bino
 or the <a href="http://binomialbiaspaper.sciris.org">paper</a> (TBC), or 
 <a href="mailto:cliff@thekerrlab.com">contact us</a>.<br>
 <br>
-<i>Version: {version.__version__} ({version.__versiondate__})</i><br>
+<i>Version: {bbv.__version__} ({bbv.__versiondate__})</i><br>
 </div>
 '''
 
@@ -98,8 +98,10 @@ app_ui = ui.page_fluid(pagestyle,
                     ui.panel_conditional("input.show_p",
                         ui.output_plot('plot_bias', width='100%', height='800px'),
                     ),
-                    ui.input_checkbox("show_p", "Show plot", True),
-                    ui.input_checkbox("show_s", "Show statistics", False),
+                    ui.div(flexgap,
+                        ui.input_checkbox("show_p", "Show plot", True),
+                        ui.input_checkbox("show_s", "Show statistics", False),
+                    )
                 ),
                 ui.div(
                     ui.panel_conditional("input.show_s",
@@ -121,14 +123,14 @@ def server(inputdict, output, session):
 
     def n_to_f():
         """ Convert from numbers to fractions """
-        g.fe = main.to_num(g.ne/g.nt)
-        g.fa = main.to_num(g.na/g.nt)
+        g.fe = bbm.to_num(g.ne/g.nt)
+        g.fa = bbm.to_num(g.na/g.nt)
         return
     
     def f_to_n():
         """ Convert from fractions to numbers """
-        g.ne = main.to_num(g.nt*g.fe)
-        g.na = main.to_num(g.nt*g.fa)
+        g.ne = bbm.to_num(g.nt*g.fe)
+        g.na = bbm.to_num(g.nt*g.fa)
         return
     
     def get_ui():
@@ -138,7 +140,7 @@ def server(inputdict, output, session):
         for key in ui_keys:
             try:
                 raw = inputdict[key]()
-                v = main.to_num(raw)
+                v = bbm.to_num(raw)
                 d[key] = v
             except:
                 print(f'Encountered error with input: {key} = "{raw}", continuing...')
@@ -164,7 +166,7 @@ def server(inputdict, output, session):
             gv = g[k]
             if not sc.approx(gv, uv): # Avoid floating point errors
                 print(f'Mismatch for {k}: {gv} ≠ {uv}')
-                uv = main.to_num(uv)
+                uv = bbm.to_num(uv)
                 g[k] = uv # Always set the current key to the current value
                 if k in ['nt', 'ntt']:
                     g.nt = uv
@@ -198,28 +200,8 @@ def server(inputdict, output, session):
     
     def make_bias():
         """ Run the actual app """
-        bb = main.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
+        bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
-    
-    # def check_stale(u):
-    #     """ Check if the UI has been updated """
-    #     print('CHECKING STALE')
-    #     stale = any([u[k] != g[k] for k in ui_keys])
-    #     if stale:
-    #         new_iter = g.iter.get() + 1
-    #         g.iter.set(new_iter)
-    #     print("STALE ANSWER IS", stale, g.iter)
-    #     return stale
-    
-    # @sh.reactive.Effect
-    # def check():
-    #     print('I AM CHECK')
-    #     u = get_ui()
-    #     stale = check_stale(u)
-    #     if stale:
-    #         with sh.reactive.isolate():
-    #             reconcile_inputs(u)
-    #     return
     
     @output
     @sh.render.plot(alt='Bias distributions')
@@ -232,7 +214,6 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.table
-    # @sh.reactive.Effect
     def results():
         """ Create a dataframe of the results """
         show_p = inputdict.show_p()

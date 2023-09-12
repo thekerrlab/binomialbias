@@ -61,9 +61,11 @@ class BinomialBias(sc.prettyobj):
             
             import binomialbias as bb
             
-            B = bb.BinomialBias(n=9, expected=4, actual=3)
+            # Use absolute numbers and plot
+            B = bb.BinomialBias(n=9, n_e=4, n_a=3)
             B.plot()
             
+            # Use fractions and print
             B = bb.BinomialBias(n=155, f_e=0.44, f_a=0.2)
             B.display()
         """
@@ -172,7 +174,6 @@ class BinomialBias(sc.prettyobj):
         pr.x = x
         pr.e_pmf = e_pmf
         pr.a_pmf = a_pmf
-        # pr.fair_round  = fair_round
         pr.actual_low  = a_low
         pr.actual_high = a_high
         self.plot_results = pr
