@@ -1,5 +1,11 @@
 """
 Shiny app for BinomialBias
+
+The complexity of the app is due to the fact that the user can enter inputs as either
+numbers or fractions, and these must be consistent. However, this can lead to infinite
+loops (i.e. the user updates a fraction, which auto-updates the slider, which updates
+the fraction again, etc.), so care must be taken to update things in the right order
+and at the right times.
 """
 
 #%% Imports
@@ -22,35 +28,65 @@ import main as bbm
 
 # Set the global dictionary defaults
 g = sc.objdict()
-g.nt = 20
-g.ne = 10
-g.na = 7
-g.ntt = g.nt
-g.fe = g.ne/g.nt
-g.fa = g.na/g.nt
+g.nt = 20 # Number of appointments
+g.ne = 10 # Expected number
+g.na = 7 # Actual number
+g.ntt = g.nt # Number of appointments (text)
+g.fe = g.ne/g.nt # Expected fraction
+g.fa = g.na/g.nt # Actual fraction
 
 # Set the component keys
 slider_keys = ['nt',  'ne', 'na']
 text_keys   = ['ntt', 'fe', 'fa']
 ui_keys = slider_keys + text_keys
 
+# Define the app defaults
+nmin = 0 # Minimum slider value
+nmax = 100 # Default maximum slider value
+slider_max = 1_000_000 # Absolute maximum slider value
+width = '50%' # Width of the text entry boxes
+delay = 0.0 # Optionally wait for user to finish input before updating
+
 
 #%% Define the interface
 
-desc = f'''
+desc = '''
 <div>This webapp calculates bias and discrimination in appointment processes, based 
 on the binomial distribution. It is provided in support of the following paper:<br>
 <br>
 <b>Quantitative assessment of discrimination in appointments to senior Australian university positions.</b>
 Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
 <br>
-For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>
-or the <a href="http://binomialbiaspaper.sciris.org">paper</a> (TBC), or 
+For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>,
+the <a href="http://binomialbiaspaper.sciris.org">paper</a> (TBC), or 
 <a href="mailto:cliff@thekerrlab.com">contact us</a>.<br>
 <br>
+</div>
+'''
+
+version = f'''
+<div><br>
 <i>Version: {bbv.__version__} ({bbv.__versiondate__})</i><br>
 </div>
 '''
+
+instr = ui.HTML('''
+This webapp calculates the bias in a selection process, such as
+the number of people of a certain group who are expected to be appointed to a committee,
+versus how many actually were.<br>
+<br>
+For example, consider a committee with a total of <i>n<sub>t</sub></i> = 20 members.
+We might expect that half would be women, i.e. <i>n<sub>e</sub></i> = 10, but that the actual
+number of women on the committee is <i>n<sub>a</sub></i> = 7.<br>
+<br>
+Using the binomial distribution, we can calculate how fair the selection process
+that produced this committee was likely to have been. In this example, the probability 
+that 7 women would have been selected given a completely fair process is <i>P(n&le;n<sub>a</sub>)</i> = 0.135
+(compared to 0.588 had there been 10 women selected). We can also calculate that 
+the bias against women being selected for this committee is <i>B = 1.86</i>.<br>
+<br>
+Further information and examples are available in the manuscript.
+''')
 
 nt_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
 ne_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
@@ -62,13 +98,6 @@ pagestyle = {"style": "margin-top: 2rem"} # Increase spacing at the top
 flexgap   = {"style": "display: flex; gap: 2rem"}
 flexwrap  = {"style": "display: flex; flex-wrap: wrap"}
 plotwrap  = {'style': 'width: 50vw; min-width: 400px; max-width: 1200px'}
-
-# Define the defaults
-nmin = 0
-nmax = 100
-slider_max = 1_000_000
-width = '50%'
-delay = 0.0 # Wait for user to finish input before updating
 
 # Define the widgets
 wg = sc.objdict()
@@ -86,6 +115,8 @@ app_ui = ui.page_fluid(pagestyle,
             ui.h2('BinomialBias'),
             ui.hr(),
             ui.HTML(desc),
+            ui.input_action_button("instructions", "Instructions", width='200px'),
+            ui.HTML(version),
             ui.hr(),
             ui.h4('Inputs'),
             ui.div(flexgap, wg.nt, wg.ntt),
@@ -106,7 +137,7 @@ app_ui = ui.page_fluid(pagestyle,
                 ui.div(
                     ui.panel_conditional("input.show_s",
                         ui.h4('Statistics'),
-                        ui.output_table('results'),
+                        ui.output_table('stats_table'),
                     ),
                 ),
             )
@@ -120,19 +151,21 @@ app_ui = ui.page_fluid(pagestyle,
 
 def server(inputdict, output, session):
     """ The PyShiny server, which includes all the update logic """
+    
+    @sh.reactive.Effect
+    @sh.reactive.event(inputdict.instructions)
+    def instructions():
+        m = ui.modal(instr, title="Instructions", easy_close=True)
+        return ui.modal_show(m)
 
-    def n_to_f():
+    def reconcile_fracs(*args):
         """ Convert from numbers to fractions """
-        g.fe = bbm.to_num(g.ne/g.nt)
-        g.fa = bbm.to_num(g.na/g.nt)
+        if 'ne' in args: g.fe = bbm.to_num(g.ne/g.nt)
+        if 'na' in args: g.fa = bbm.to_num(g.na/g.nt)
+        if 'fe' in args: g.ne = round(bbm.to_num(g.nt*g.fe))
+        if 'fa' in args: g.na = round(bbm.to_num(g.nt*g.fa))
         return
-    
-    def f_to_n():
-        """ Convert from fractions to numbers """
-        g.ne = round(bbm.to_num(g.nt*g.fe))
-        g.na = round(bbm.to_num(g.nt*g.fa))
-        return
-    
+
     def get_ui():
         """ Get all values from the UI """
         sc.timedsleep(delay) # Don't update the UI before the user is done
@@ -173,35 +206,33 @@ def server(inputdict, output, session):
                 if k in ['nt', 'ntt']:
                     g.nt = uv
                     g.ntt = uv
-                    n_to_f()
+                    reconcile_fracs('ne', 'na')
                     if k == 'ntt':
                         check_sliders()
-                elif k in ['ne', 'na']:
-                    n_to_f()
-                elif k in ['fe', 'fa']:
-                    f_to_n()
+                else:
+                    reconcile_fracs(k)
                 break
         
-        # This is here to avoid a potential infinite loop
+        # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
             set_ui(u)
         sc.heading('Done reconciling inputs.')
         return
         
-    def set_ui(curr):
+    def set_ui(u):
         """ Update the UI, and ensure the dict matches exactly """
         print('Updating UI')
-        for key in ui_keys:
-            curr_v = curr[key]
-            v = g[key]
-            if curr_v != v:
-                print(f'  Updating {key}: {curr_v} → {v}')
-                if   key in slider_keys: ui.update_slider(key, value=v)
-                elif key in text_keys:   ui.update_text(key, value=v)
+        for k in ui_keys:
+            uv = u[k]
+            gv = g[k]
+            if uv != gv:
+                print(f'  Updating {k}: {uv} → {gv}')
+                if   k in slider_keys: ui.update_slider(k, value=gv)
+                elif k in text_keys:   ui.update_text(k,   value=gv)
         return
     
     def make_bias():
-        """ Run the actual app """
+        """ Run the actual calculations -- the easiest part! """
         bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
@@ -209,19 +240,19 @@ def server(inputdict, output, session):
     @sh.render.plot(alt='Bias distributions')
     def plot_bias():
         """ Plot the graphs """
-        reconcile_inputs()
+        reconcile_inputs() # Reconcile inputs here since this gets called before the table
         bb = make_bias()
         bb.plot(show=False, letters=False)
         return
     
     @output
     @sh.render.table
-    def results():
+    def stats_table():
         """ Create a dataframe of the results """
         show_p = inputdict.show_p()
-        if show_p: # Logic for updating to be mostly right, but get_ui() still triggers the plot refresh
+        if show_p: # If we're showing the plot, trigger an event by getting the UI values
             get_ui()
-        else:
+        else: # If we're not showing the plot, we need to reconcile inputs
             reconcile_inputs()
         bb = make_bias()
         df = bb.to_df(string=True)
@@ -231,6 +262,7 @@ def server(inputdict, output, session):
 
 
 #%% Define and optionally run the app
+
 app = sh.App(app_ui, server, debug=True)
 
 
