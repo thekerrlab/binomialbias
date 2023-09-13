@@ -167,7 +167,7 @@ the bias against women being selected for this committee is <i>B = 1.86</i>.<br>
 Further information and examples are available in the manuscript.
 ''')
 
-def server(inputdict, output, session):
+def server(input, output, session):
     """ The PyShiny server, which includes all the update logic """
     
     T2 = sc.timer()
@@ -175,7 +175,7 @@ def server(inputdict, output, session):
     g = make_globaldict()
     
     @sh.reactive.Effect
-    @sh.reactive.event(inputdict.instructions)
+    @sh.reactive.event(input.instructions)
     def instructions():
         m = ui.modal(instr, title="Instructions", easy_close=True)
         return ui.modal_show(m)
@@ -194,7 +194,7 @@ def server(inputdict, output, session):
         u = sc.objdict()
         for key in ui_keys:
             try:
-                raw = inputdict[key]()
+                raw = input[key]()
                 v = bbm.to_num(raw)
                 u[key] = v
             except:
@@ -261,7 +261,7 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.plot(alt='Bias distributions')
-    @sh.reactive.event(inputdict.update, ignore_none=False)
+    @sh.reactive.event(input.update, ignore_none=False)
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
@@ -272,10 +272,10 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.table
-    @sh.reactive.event(inputdict.update, ignore_none=False)
+    @sh.reactive.event(input.update, ignore_none=False)
     def stats_table():
         """ Create a dataframe of the results """
-        show_p = inputdict.show_p()
+        show_p = input.show_p()
         if show_p: # If we're showing the plot, trigger an event by getting the UI values
             get_ui()
         else: # If we're not showing the plot, we need to reconcile inputs
