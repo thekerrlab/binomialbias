@@ -137,8 +137,7 @@ def make_ui(*args, **kwargs):
                             ui.output_table('stats_table'),
                         ),
                     ),
-                    ui.output_text_verbatim('debug_text'), # Hidden unless debug = True above
-                    ui.output_text_verbatim('reconcile'), # Hidden unless debug = True above TEMP
+                    ui.output_text_verbatim('debug_text'), # Hidden unless debug = True above, but needed for reactivity
                 ),
             )
         ),
@@ -294,10 +293,11 @@ def server(input, output, session):
     @output
     @sh.render.text
     def debug_text():
-        """ Debugging """
+        """ Debugging -- which also happens to handle the reactivity! """
         import os
         u = get_ui()
         
+        # Handle automatic updates
         if input.autoupdate():
             with sh.reactive.isolate():
                 reconcile_inputs()
