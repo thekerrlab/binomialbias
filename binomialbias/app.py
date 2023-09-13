@@ -38,8 +38,7 @@ def make_globaldict():
     g.ntt = g.nt # Number of appointments (text)
     g.fe = g.ne/g.nt # Expected fraction
     g.fa = g.na/g.nt # Actual fraction
-    g.r_iter = 0 # TEMP
-    g.p_iter = 0 # TEMP
+    g.iter = 0 # How many times the value has been updated (the iteration)
     
     return g
 
@@ -54,6 +53,7 @@ nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
 width = '50%' # Width of the text entry boxes
 delay = 0.0 # Optionally wait for user to finish input before updating
+debug = True
 
 
 #%% Define the interface
@@ -137,7 +137,7 @@ def make_ui(*args, **kwargs):
                             ui.output_table('stats_table'),
                         ),
                     ),
-                    ui.output_text_verbatim("debug"),
+                    ui.output_text_verbatim("debug"), # Hidden unless debug = True above
                 ),
             )
         ),
@@ -238,7 +238,7 @@ def server(input, output, session):
         # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
             set_ui(u)
-        g.r_iter += 1
+        g.iter += 1
         sc.heading('Done reconciling inputs.')
         return
         
@@ -266,7 +266,7 @@ def server(input, output, session):
         """ Plot the graphs """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
         bb = make_bias()
-        g.p_iter += 1
+        g.iter += 1
         fig = bb.plot(show=False, letters=False, wrap=True)
         return fig
     
@@ -296,12 +296,13 @@ pid = {os.getpid()}
 cwd = {os.getcwd()}
 gid = {id(g)}
 elapsed = {T1.tocout()}, {T2.tocout()}
-reconcile_iter = {g.r_iter}
-plot_iter = {g.p_iter}
-        
+iter = {g.iter}
+
 ui =
 {u}'''
-        return s
+        out = s if debug else '' # Only render output if we're in debug mode
+        
+        return out
 
     return
 
