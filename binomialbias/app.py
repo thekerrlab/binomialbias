@@ -23,7 +23,7 @@ from shiny import ui
 import version as bbv
 import main as bbm
 
-T1 = sc.timer() # TEMP
+T1 = sc.timer() # For debugging
 
 
 #%% Global variables
@@ -117,7 +117,7 @@ def make_ui(*args, **kwargs):
                 ui.div(flexgap, wg.na, wg.fa),
                 ui.div(flexgap,
                     ui.input_action_button("update", "Update", class_="btn-success", width='80%'),
-                    # ui.input_switch("autoupdate", 'Automatic', False, width='150px'),
+                    ui.input_switch("autoupdate", 'Automatic', False, width='150px'),
                 )
             ),
             ui.panel_main(
@@ -174,10 +174,8 @@ use the arrow keys rather than clicking and dragging.
 def server(input, output, session):
     """ The PyShiny server, which includes all the update logic """
     
-    T2 = sc.timer()
-    
+    T2 = sc.timer() # For debugging
     g = make_globaldict()
-    
     count = sh.reactive.Value(0)
     rerender = sh.reactive.Value(0)
     
@@ -266,15 +264,14 @@ def server(input, output, session):
         bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
-    @output
-    @sh.render.text
+    @sh.reactive.Effect
     @sh.reactive.event(input.update, count, ignore_none=False)
     def reconcile():
         """ Coordinate reconciliation """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
         rr = rerender.get()
         rerender.set(rr+1)
-        return ''
+        return
     
     @output
     @sh.render.plot(alt='Bias distributions')
@@ -301,11 +298,12 @@ def server(input, output, session):
         """ Debugging """
         import os
         u = get_ui()
-        i = -1
         
-        # with sh.reactive.isolate():
-        #     i = count.get()
-        #     count.set(i+1)
+        if input.autoupdate():
+            with sh.reactive.isolate():
+                reconcile_inputs()
+                rr = rerender.get()
+                rerender.set(rr+1)
             
         s = f'''
 user = {sc.getuser()}
