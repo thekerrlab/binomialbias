@@ -53,7 +53,7 @@ nmin = 0 # Minimum slider value
 nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
 width = '50%' # Width of the text entry boxes
-delay = 0.3 # Optionally wait for user to finish input before updating
+delay = 0.0 # Optionally wait for user to finish input before updating
 
 
 #%% Define the interface
@@ -115,6 +115,7 @@ def make_ui(*args, **kwargs):
                 ui.div(flexgap, wg.nt, wg.ntt),
                 ui.div(flexgap, wg.ne, wg.fe),
                 ui.div(flexgap, wg.na, wg.fa),
+                ui.input_action_button("update", "Update", class_="btn-success"),
             ),
             ui.panel_main(
                 ui.div(flexwrap,
@@ -257,16 +258,18 @@ def server(inputdict, output, session):
     
     @output
     @sh.render.plot(alt='Bias distributions')
+    @sh.reactive.event(inputdict.update, ignore_none=False)
     def plot_bias():
         """ Plot the graphs """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
         bb = make_bias()
         g.p_iter += 1
-        bb.plot(show=False, letters=False, wrap=True)
-        return
+        fig = bb.plot(show=False, letters=False, wrap=True)
+        return fig
     
     @output
     @sh.render.table
+    @sh.reactive.event(inputdict.update, ignore_none=False)
     def stats_table():
         """ Create a dataframe of the results """
         show_p = inputdict.show_p()
@@ -287,6 +290,7 @@ def server(inputdict, output, session):
         s = f'''
 user = {sc.getuser()}
 pid = {os.getpid()}
+cwd = {os.getcwd()}
 gid = {id(g)}
 elapsed = {T1.tocout()}, {T2.tocout()}
 reconcile_iter = {g.r_iter}
