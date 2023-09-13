@@ -116,8 +116,8 @@ def make_ui(*args, **kwargs):
                 ui.div(flexgap, wg.ne, wg.fe),
                 ui.div(flexgap, wg.na, wg.fa),
                 ui.div(flexgap,
-                    ui.input_action_button("update", "Update", class_="btn-success"),
-                    ui.input_switch("autoupdate", ui.HTML("Automatic<br>update"), False),
+                    ui.input_action_button("update", "Update", class_="btn-success", width='80%'),
+                    ui.input_switch("autoupdate", 'Automatic', False, width='150px'),
                 )
             ),
             ui.panel_main(
