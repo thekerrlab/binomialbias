@@ -176,7 +176,6 @@ def server(input, output, session):
     
     T2 = sc.timer() # For debugging
     g = make_globaldict()
-    count = sh.reactive.Value(0)
     rerender = sh.reactive.Value(0)
     
     @sh.reactive.Effect
@@ -265,7 +264,7 @@ def server(input, output, session):
         return bb
     
     @sh.reactive.Effect
-    @sh.reactive.event(input.update, count, ignore_none=False)
+    @sh.reactive.event(input.update, ignore_none=False)
     def reconcile():
         """ Coordinate reconciliation """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
@@ -312,7 +311,6 @@ cwd = {os.getcwd()}
 gid = {id(g)}
 elapsed = {T1.tocout()}, {T2.tocout()}
 iter = {g.iter}
-count = {count.get()}
 rerender = {rerender.get()}
 update = {input.update.get()}
 
