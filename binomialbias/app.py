@@ -138,6 +138,7 @@ def make_ui(*args, **kwargs):
                         ),
                     ),
                     ui.output_text_verbatim('debug_text'), # Hidden unless debug = True above
+                    ui.output_text_verbatim('reconcile'), # Hidden unless debug = True above TEMP
                 ),
             )
         ),
@@ -164,7 +165,10 @@ that 7 women would have been selected given a completely fair process is <i>P(n&
 (compared to 0.588 had there been 10 women selected). We can also calculate that 
 the bias against women being selected for this committee is <i>B = 1.86</i>.<br>
 <br>
-Further information and examples are available in the manuscript.
+Further information and examples are available in the manuscript.<br>
+<br>
+<i>Note:</i> for finer-grained control of the sliders, you can click on the marker and
+use the arrow keys rather than clicking and dragging.
 ''')
 
 def server(input, output, session):
@@ -262,13 +266,15 @@ def server(input, output, session):
         bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
+    @output
+    @sh.render.text
     @sh.reactive.event(input.update, count, ignore_none=False)
     def reconcile():
         """ Coordinate reconciliation """
         reconcile_inputs() # Reconcile inputs here since this gets called before the table
         rr = rerender.get()
         rerender.set(rr+1)
-        return
+        return ''
     
     @output
     @sh.render.plot(alt='Bias distributions')
