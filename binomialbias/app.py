@@ -137,7 +137,7 @@ def make_ui(*args, **kwargs):
                             ui.output_table('stats_table'),
                         ),
                     ),
-                    ui.output_text_verbatim("debug"), # Hidden unless debug = True above
+                    ui.output_text_verbatim('debug_text'), # Hidden unless debug = True above
                 ),
             )
         ),
@@ -173,6 +173,9 @@ def server(input, output, session):
     T2 = sc.timer()
     
     g = make_globaldict()
+    
+    count = sh.reactive.Value(0)
+    rerender = sh.reactive.Value(0)
     
     @sh.reactive.Effect
     @sh.reactive.event(input.instructions)
@@ -259,12 +262,19 @@ def server(input, output, session):
         bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
         return bb
     
+    @sh.reactive.event(input.update, count, ignore_none=False)
+    def reconcile():
+        """ Coordinate reconciliation """
+        reconcile_inputs() # Reconcile inputs here since this gets called before the table
+        rr = rerender.get()
+        rerender.set(rr+1)
+        return
+    
     @output
     @sh.render.plot(alt='Bias distributions')
-    @sh.reactive.event(input.update, ignore_none=False)
+    @sh.reactive.event(rerender, ignore_none=False)
     def plot_bias():
         """ Plot the graphs """
-        reconcile_inputs() # Reconcile inputs here since this gets called before the table
         bb = make_bias()
         g.iter += 1
         fig = bb.plot(show=False, letters=False, wrap=True)
@@ -272,24 +282,25 @@ def server(input, output, session):
     
     @output
     @sh.render.table
-    @sh.reactive.event(input.update, ignore_none=False)
+    @sh.reactive.event(rerender, ignore_none=False)
     def stats_table():
         """ Create a dataframe of the results """
-        show_p = input.show_p()
-        if show_p: # If we're showing the plot, trigger an event by getting the UI values
-            get_ui()
-        else: # If we're not showing the plot, we need to reconcile inputs
-            reconcile_inputs()
         bb = make_bias()
         df = bb.to_df(string=True)
         return df
     
     @output
     @sh.render.text
-    def debug():
+    def debug_text():
         """ Debugging """
         import os
         u = get_ui()
+        i = -1
+        
+        # with sh.reactive.isolate():
+        #     i = count.get()
+        #     count.set(i+1)
+            
         s = f'''
 user = {sc.getuser()}
 pid = {os.getpid()}
@@ -297,6 +308,9 @@ cwd = {os.getcwd()}
 gid = {id(g)}
 elapsed = {T1.tocout()}, {T2.tocout()}
 iter = {g.iter}
+count = {count.get()}
+rerender = {rerender.get()}
+update = {input.update.get()}
 
 ui =
 {u}'''
