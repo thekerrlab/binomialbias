@@ -51,6 +51,7 @@ if show_sliders:
 else:
     slider_keys = []
     text_keys = ['ntt', 'fe', 'nat']
+round_keys = ['nt',  'ne', 'na', 'ntt'] # These quantities need to be rounded
 ui_keys = slider_keys + text_keys
 
 # Define the app defaults
@@ -245,7 +246,7 @@ def server(input, output, session):
             gv = g[k]
             uv = bbm.to_num(u[k])
             if not np.isnan(uv):
-                if k in slider_keys:
+                if k in round_keys:
                     uv = round(uv)
                 match = sc.approx(gv, uv)
                 if not match: # Avoid floating point errors

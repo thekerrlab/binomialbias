@@ -355,9 +355,7 @@ class BinomialBias(sc.prettyobj):
             if gap or i == 1: 
                 ax.text(ira, dy+pmf[ira],'$n_a$', **textkw)
             
-            print('TEMP HI I AM', d.n, vmax, type(d.n), type(vmax), d.n/vmax*0.3)
-            
-            # ax.set_aspect(d.n/vmax*0.3)
+            ax.set_aspect(d.n/vmax*0.3)
             
         # Add frame labels
         if letters:
