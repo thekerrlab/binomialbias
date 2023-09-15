@@ -260,7 +260,8 @@ def server(input, output, session):
                             check_sliders()
                     else:
                         reconcile_fracs(k)
-                    break
+                    if input.autoupdate(): # Only handle one input at a time
+                        break
         
         # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
