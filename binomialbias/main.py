@@ -247,7 +247,10 @@ class BinomialBias(sc.prettyobj):
         pl.ylabel('Probability')
         pl.xlabel('Number of appointments')
         sep = '\n' if wrap else ' ' # Choose between line break and space
-        pl.title(f'Expected ($n_e=${d.expected:0.0f}) vs. actual ($n_a=${d.actual:0.0f}){sep}out of $n_t=${d.n:0.0f} appointments\n\n')
+        estr = to_str(d.expected)
+        astr = to_str(d.actual)
+        nstr = to_str(d.n)
+        pl.title(f'Expected ($n_e=${estr}) vs. actual ($n_a=${astr}){sep}out of $n_t=${nstr} appointments\n\n')
     
         ## Calculate cdf
     
@@ -300,7 +303,7 @@ class BinomialBias(sc.prettyobj):
             fairx = d.n*0.1
             ha = 'left'
         futurestr = '$P_{fut}$'
-        pl.text(fairx, a_max, f'{futurestr} = {d.p_future:0.3f}', c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
+        pl.text(fairx, a_max, f'{futurestr} = {to_str(d.p_future)}', c=ci_color, horizontalalignment=ha).set_bbox(bbkw)
         
         
         dw = barkw.width/2

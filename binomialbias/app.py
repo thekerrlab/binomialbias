@@ -35,7 +35,8 @@ def make_globaldict():
     g.nt = 20 # Number of appointments
     g.ne = 10 # Expected number
     g.na = 7 # Actual number
-    g.ntt = g.nt # Number of appointments (text)
+    g.ntt = g.nt # Number of appointments (text box)
+    g.nat = g.na # Actual number (text box)
     g.fe = g.ne/g.nt # Expected fraction
     g.fa = g.na/g.nt # Actual fraction
     g.iter = 0 # How many times the value has been updated (the iteration)
@@ -43,11 +44,17 @@ def make_globaldict():
     return g
 
 # Set the component keys
-slider_keys = ['nt',  'ne', 'na']
-text_keys   = ['ntt', 'fe', 'fa']
+show_sliders = False # Whether or not to show the sliders
+if show_sliders:
+    slider_keys = ['nt',  'ne', 'na']
+    text_keys   = ['ntt', 'fe', 'fa']
+else:
+    slider_keys = []
+    text_keys = ['ntt', 'fe', 'nat']
 ui_keys = slider_keys + text_keys
 
 # Define the app defaults
+
 nmin = 0 # Minimum slider value
 nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
@@ -81,11 +88,14 @@ def make_ui(*args, **kwargs):
     '''
     
     nt_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
-    ne_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
     na_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
-    ntt_str = '(or type any value)'
+    ne_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
     fe_str = ui.HTML('Expected fraction (<i>f<sub>e</sub></i>)')
     fa_str = ui.HTML('Actual fraction (<i>f<sub>a</sub></i>)')
+    if show_sliders:
+        ntt_str = '(or type any value)'
+    else:
+        ntt_str = nt_str
     pagestyle = {"style": "margin-top: 2rem"} # Increase spacing at the top
     flexgap   = {"style": "display: flex; gap: 2rem"}
     flexwrap  = {"style": "display: flex; flex-wrap: wrap"}
@@ -97,9 +107,25 @@ def make_ui(*args, **kwargs):
     wg.nt  = ui.input_slider('nt', label=nt_str, min=nmin, max=nmax, value=g.nt)
     wg.ne  = ui.input_slider('ne', label=ne_str, min=nmin, max=nmax, value=g.ne)
     wg.na  = ui.input_slider('na', label=na_str, min=nmin, max=nmax, value=g.na)
-    wg.ntt = ui.input_text('ntt',  label=ntt_str, width=width, value=g.ntt)
+    wg.ntt = ui.input_text('ntt',  label=ntt_str, width=width, value=g.nt)
+    wg.nat = ui.input_text('nat',  label=na_str,  width=width, value=g.na)
     wg.fe  = ui.input_text('fe',   label=fe_str,  width=width, value=g.fe)
     wg.fa  = ui.input_text('fa',   label=fa_str,  width=width, value=g.fa)
+    
+    # Define the inputs
+    if show_sliders:
+        inputs = [
+            ui.div(flexgap, wg.nt, wg.ntt),
+            ui.div(flexgap, wg.ne, wg.fe),
+            ui.div(flexgap, wg.na, wg.fa),
+        ]
+    else:
+        inputs = [
+            wg.ntt,
+            wg.fe,
+            wg.nat,
+        ]
+        
     
     # Define the app layout
     app_ui = ui.page_fluid(pagestyle,
@@ -112,9 +138,7 @@ def make_ui(*args, **kwargs):
                 ui.HTML(version),
                 ui.hr(),
                 ui.h4('Inputs'),
-                ui.div(flexgap, wg.nt, wg.ntt),
-                ui.div(flexgap, wg.ne, wg.fe),
-                ui.div(flexgap, wg.na, wg.fa),
+                *inputs,
                 ui.div(flexgap,
                     ui.input_action_button("update", "Update", class_="btn-success", width='80%'),
                     ui.input_switch("autoupdate", 'Automatic', False, width='150px'),
@@ -155,7 +179,7 @@ the number of people of a certain group who are expected to be appointed to a co
 versus how many actually were.<br>
 <br>
 For example, consider a committee with a total of <i>n<sub>t</sub></i> = 20 members.
-We might expect that half would be women, i.e. <i>n<sub>e</sub></i> = 10, but that the actual
+We might expect that half would be women, i.e. <i>f<sub>e</sub></i> = 0.5, but that the actual
 number of women on the committee is <i>n<sub>a</sub></i> = 7.<br>
 <br>
 Using the binomial distribution, we can calculate how fair the selection process
@@ -165,9 +189,6 @@ that 7 women would have been selected given a completely fair process is <i>P(n&
 the bias against women being selected for this committee is <i>B = 1.86</i>.<br>
 <br>
 Further information and examples are available in the manuscript.<br>
-<br>
-<i>Note:</i> for finer-grained control of the sliders, you can click on the marker and
-use the arrow keys rather than clicking and dragging.
 ''')
 
 def server(input, output, session):
@@ -185,7 +206,8 @@ def server(input, output, session):
 
     def reconcile_fracs(*args):
         """ Convert from numbers to fractions """
-        if 'ne' in args: g.fe = bbm.to_num(g.ne/g.nt)
+        if show_sliders:
+            if 'ne' in args: g.fe = bbm.to_num(g.ne/g.nt)
         if 'na' in args: g.fa = bbm.to_num(g.na/g.nt)
         if 'fe' in args: g.ne = round(bbm.to_num(g.nt*g.fe))
         if 'fa' in args: g.na = round(bbm.to_num(g.nt*g.fa))
@@ -259,7 +281,11 @@ def server(input, output, session):
     
     def make_bias():
         """ Run the actual calculations -- the easiest part! """
-        bb = bbm.BinomialBias(n=g.ntt, f_e=g.fe, f_a=g.fa)
+        if show_sliders:
+            kw = dict(n=g.ntt, f_e=g.fe, f_a=g.fa)
+        else:
+            kw = dict(n=g.ntt, f_e=g.fe, n_a=g.nat)
+        bb = bbm.BinomialBias(**kw)
         return bb
     
     @sh.reactive.Effect
