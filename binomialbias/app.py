@@ -224,7 +224,7 @@ def server(input, output, session):
                 u[key] = v
             except:
                 print(f'Encountered error with input: {key} = "{raw}", continuing...')
-                u[key] = g[key]
+                u[key] = np.nan
         print(f'Current UI state:\n{u}')
         return u
     

@@ -27,15 +27,19 @@ def to_str(x, sf=3):
 
 def to_num(x):
     """ Convert a string to a number, handling either ints or floats """
-    if sc.isnumber(x):
-        x = to_str(x)
-    num = float(x) if '.' in x else int(x) # Handle int or float
+    try:
+        if sc.isnumber(x):
+            x = to_str(x)
+        num = float(x) if '.' in x else int(x) # Handle int or float
+    except:
+        num = np.nan
     return num
 
 
 class BinomialBias(sc.prettyobj):
     
-    def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, display=False, plot=False, **kwargs):
+    def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, one_sided=True,
+                 display=False, plot=False, **kwargs):
         """
         Analysis for the paper "Quantitative assessment of discrimination in 
         appointments to senior Australian university positions" -
@@ -48,12 +52,13 @@ class BinomialBias(sc.prettyobj):
             n_a (int/float): Actual number appointments of a group
             f_e (float): Explicitly specify the fraction of expected appointments (instead of n_e)
             f_a (float): Explicitly specify the fraction of actual appointments (instead of n_a)
-            display (bool): whether to display the results (equivalent to calling B.display())
-            plot (bool): whether to plot the results (equivalent to calling B.plot())
+            one_sided: Whether to always show the probability on the same side (else, swap above 50%)
+            display (bool): Whether to display the results (equivalent to calling B.display())
+            plot (bool): Whether to plot the results (equivalent to calling B.plot())
             
         Results are stored in "results", which has the following fields:
-            ci: 95% confidence interval for individuals given a fair process
-            cdf: Cumulative distribution function of ra or less appointments
+            expected_low, expected_high: 95% confidence interval for individuals given a fair process
+            cumprob: Cumulative distribution function of n_a or fewer appointments
             bias: Preference ratio the estimate of the disparity in how two groups are viewed by selectors
             p_future: Probability of unbiased selection; values much less than 1 do imply bias; values < 0.1 should be cause for serious concern and values < 0.01 should provoke urgent action.
     
@@ -78,9 +83,10 @@ class BinomialBias(sc.prettyobj):
         # Handle inputs
         if f_e is not None: expected = f_e*n
         if f_a is not None: actual   = f_a*n
-        self.n        = n
-        self.expected = expected
-        self.actual   = actual
+        self.n         = n
+        self.expected  = expected
+        self.actual    = actual
+        self.one_sided = one_sided
         
         
         # Perform validation
@@ -134,7 +140,7 @@ class BinomialBias(sc.prettyobj):
             bias = ((n-actual)/(n-expect))/(actual/expect)
         else:
             bias = np.inf
-        if actual <= expect:
+        if self.one_sided or actual <= expect:
             cumprob = sum(e_pmf[x<=actual])
         else:
             cumprob = sum(e_pmf[x>=actual])
@@ -204,7 +210,7 @@ class BinomialBias(sc.prettyobj):
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True, wrap=False,
-             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, one_sided=True, max_bars=1000, show=True):
+             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, max_bars=1000, show=True):
         """
         Plot the results of the bias calculation
         
@@ -219,7 +225,6 @@ class BinomialBias(sc.prettyobj):
             figkw: a dictionary of keyword arguments for the figure (passed to pl.figure())
             layoutkw: a dictionary of keyword arguments for the figure layout (passed to pl.subplots_adjust())
             textkw: a dictionary of keyword arguments for the text (passed to pl.text())
-            one_sided: whether to always show the probability on the same side (else, swap above 50%)
             max_bars: the maximum number of bars to show (else just plot the text)
             show: whether or not to show the figure
         """
@@ -258,7 +263,7 @@ class BinomialBias(sc.prettyobj):
         e_max = max(d.e_pmf)
         a_max = max(d.a_pmf)
         lt_actual = d.x<=d.actual
-        if one_sided or (d.actual <= d.expected):
+        if self.one_sided or (d.actual <= d.expected):
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
             plabel = '$P(n ≤ n_a)$'
