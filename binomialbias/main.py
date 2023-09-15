@@ -61,7 +61,7 @@ class BinomialBias(sc.prettyobj):
             
         Results are stored in "results", which has the following fields:
             expected_low, expected_high: 95% confidence interval for individuals given a fair process
-            cumprob: Cumulative distribution function of n_a or fewer appointments
+            cum_prob: Cumulative distribution function of n_a or fewer appointments
             bias: Preference ratio the estimate of the disparity in how two groups are viewed by selectors
             p_future: Probability of unbiased selection; values much less than 1 do imply bias; values < 0.1 should be cause for serious concern and values < 0.01 should provoke urgent action.
     
@@ -144,9 +144,9 @@ class BinomialBias(sc.prettyobj):
         else:
             bias = np.inf
         if self.one_sided or actual <= expect:
-            cumprob = sum(e_pmf[x<=actual])
+            cum_prob = sum(e_pmf[x<=actual])
         else:
-            cumprob = sum(e_pmf[x>=actual])
+            cum_prob = sum(e_pmf[x>=actual])
         
         # Gaussian CI approximation
         e_mean = n*f_e
@@ -180,7 +180,7 @@ class BinomialBias(sc.prettyobj):
         # Store outputs
         self.results.expected_low = e_low
         self.results.expected_high = e_high
-        self.results.cumprob = cumprob
+        self.results.cum_prob = cum_prob
         self.results.bias = bias
         self.results.p_future = p_future
         
@@ -285,7 +285,7 @@ class BinomialBias(sc.prettyobj):
         label  = f'$f_e$ = {to_str(d.f_expected, 2)}\n'
         label += f'$f_a$ = {to_str(d.f_actual, 2)}\n'
         label += '\n'
-        label += f'{plabel} = {to_str(d.cumprob)}\n'
+        label += f'{plabel} = {to_str(d.cum_prob)}\n'
         label += f'$B$ = {to_str(d.bias)}'
     
         if not too_many:
