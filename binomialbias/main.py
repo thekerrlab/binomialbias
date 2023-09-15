@@ -204,7 +204,7 @@ class BinomialBias(sc.prettyobj):
 
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True, wrap=False,
-             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, show=True, max_bars=1000):
+             fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, one_sided=True, max_bars=1000, show=True):
         """
         Plot the results of the bias calculation
         
@@ -219,8 +219,9 @@ class BinomialBias(sc.prettyobj):
             figkw: a dictionary of keyword arguments for the figure (passed to pl.figure())
             layoutkw: a dictionary of keyword arguments for the figure layout (passed to pl.subplots_adjust())
             textkw: a dictionary of keyword arguments for the text (passed to pl.text())
-            show: whether or not to show the figure
+            one_sided: whether to always show the probability on the same side (else, swap above 50%)
             max_bars: the maximum number of bars to show (else just plot the text)
+            show: whether or not to show the figure
         """
         
         # Shorten variables into a data dict
@@ -254,7 +255,7 @@ class BinomialBias(sc.prettyobj):
         e_max = max(d.e_pmf)
         a_max = max(d.a_pmf)
         lt_actual = d.x<=d.actual
-        if d.actual <= d.expected:
+        if one_sided or (d.actual <= d.expected):
             rarea = d.x[lt_actual]
             yarea = d.e_pmf[lt_actual]
             plabel = '$P(n ≤ n_a)$'
