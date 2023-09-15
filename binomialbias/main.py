@@ -25,14 +25,17 @@ def to_str(x, sf=3):
     return string
 
 
-def to_num(x):
+def to_num(x, die=False):
     """ Convert a string to a number, handling either ints or floats """
     try:
         if sc.isnumber(x):
             x = to_str(x)
         num = float(x) if '.' in x else int(x) # Handle int or float
-    except:
-        num = np.nan
+    except Exception as E:
+        if die:
+            raise E
+        else:
+            num = np.nan
     return num
 
 
@@ -352,7 +355,9 @@ class BinomialBias(sc.prettyobj):
             if gap or i == 1: 
                 ax.text(ira, dy+pmf[ira],'$n_a$', **textkw)
             
-            ax.set_aspect(d.n/vmax*0.3)
+            print('TEMP HI I AM', d.n, vmax, type(d.n), type(vmax), d.n/vmax*0.3)
+            
+            # ax.set_aspect(d.n/vmax*0.3)
             
         # Add frame labels
         if letters:

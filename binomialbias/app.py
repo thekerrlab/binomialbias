@@ -220,7 +220,7 @@ def server(input, output, session):
         for key in ui_keys:
             try:
                 raw = input[key]()
-                v = bbm.to_num(raw)
+                v = bbm.to_num(raw, die=False)
                 u[key] = v
             except:
                 print(f'Encountered error with input: {key} = "{raw}", continuing...')
@@ -244,21 +244,22 @@ def server(input, output, session):
         for k in ui_keys:
             gv = g[k]
             uv = bbm.to_num(u[k])
-            if k in slider_keys:
-                uv = round(uv)
-            match = sc.approx(gv, uv)
-            if not match: # Avoid floating point errors
-                print(f'Mismatch for {k}: {gv} ≠ {uv}')
-                g[k] = uv # Always set the current key to the current value
-                if k in ['nt', 'ntt']:
-                    g.nt = uv
-                    g.ntt = uv
-                    reconcile_fracs('ne', 'na')
-                    if k == 'ntt':
-                        check_sliders()
-                else:
-                    reconcile_fracs(k)
-                break
+            if not np.isnan(uv):
+                if k in slider_keys:
+                    uv = round(uv)
+                match = sc.approx(gv, uv)
+                if not match: # Avoid floating point errors
+                    print(f'Mismatch for {k}: {gv} ≠ {uv}')
+                    g[k] = uv # Always set the current key to the current value
+                    if k in ['nt', 'ntt']:
+                        g.nt = uv
+                        g.ntt = uv
+                        reconcile_fracs('ne', 'na')
+                        if k == 'ntt':
+                            check_sliders()
+                    else:
+                        reconcile_fracs(k)
+                    break
         
         # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
