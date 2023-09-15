@@ -78,8 +78,8 @@ class BinomialBias(sc.prettyobj):
             B.display()
         """
         # Handle deprecations
-        expected = kwargs.pop('expected', n_e)
-        actual   = kwargs.pop('actual', n_a)
+        expected = kwargs.pop('expected', None) or n_e
+        actual   = kwargs.pop('actual', None) or n_a
         if 0 < expected < 1: f_e = expected # Treat as fractions
         if 0 < actual   < 1: f_a = actual
         
@@ -372,9 +372,18 @@ class BinomialBias(sc.prettyobj):
         return fig
 
 
-def plot_bias(n=20, expected=10, actual=7, show=True, letters=True, display=True, **kwargs):
-    """ Script to simply plot the bias without creating a class instance; see BinomialBias for arguments """
-    B = BinomialBias(n=n, expected=expected, actual=actual)
+def plot_bias(show=True, letters=True, display=True, **kwargs):
+    """
+    Script to simply plot the bias without creating a class instance; see BinomialBias for arguments
+    
+    **Example**::
+        
+        import binomialbias as bb
+        bb.plot_bias(n=20, n_e=10, n_a=7)    
+    """
+    bb_keys = ['n', 'n_e', 'n_a', 'f_e', 'f_a', 'expected', 'actual']
+    bb_kwargs = {k:kwargs.pop(k) for k in bb_keys if k in kwargs}
+    B = BinomialBias(**bb_kwargs)
     B.plot(show=show, letters=letters, **kwargs)
     if display:
         B.display()
