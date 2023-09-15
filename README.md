@@ -1,4 +1,4 @@
-# Binomial Bias
+# BinomialBias
 
 [![PyPI](https://badgen.net/pypi/v/binomialbias/?color=blue)](https://pypi.org/project/binomialbias)
 [![Tests](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml/badge.svg)](https://github.com/thekerrlab/binomialbias/actions/workflows/tests.yaml?query=workflow)
