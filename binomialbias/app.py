@@ -44,7 +44,7 @@ def make_globaldict():
     return g
 
 # Set the component keys
-show_sliders = False # Whether or not to show the sliders
+show_sliders = True # Whether or not to show the sliders
 if show_sliders:
     slider_keys = ['nt',  'ne', 'na']
     text_keys   = ['ntt', 'fe', 'fa']
