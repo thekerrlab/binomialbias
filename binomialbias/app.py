@@ -241,28 +241,31 @@ def server(input, output, session):
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
         u = get_ui()
+        uvdict = sc.objdict()
+        matches = sc.objdict()
         for k in ui_keys:
-            print(f'{k}: g={g[k]}, u={u[k]}')
-        for k in ui_keys:
-            gv = g[k]
             uv = bbm.to_num(u[k])
             if not np.isnan(uv):
                 if k in round_keys:
                     uv = round(uv)
-                match = sc.approx(gv, uv)
-                if not match: # Avoid floating point errors
-                    print(f'Mismatch for {k}: {gv} ≠ {uv}')
-                    g[k] = uv # Always set the current key to the current value
-                    if k in ['nt', 'ntt']:
-                        g.nt = uv
-                        g.ntt = uv
-                        reconcile_fracs('ne', 'na')
-                        if k == 'ntt':
-                            check_sliders()
-                    else:
-                        reconcile_fracs(k)
-                    if input.autoupdate(): # Only handle one input at a time
-                        break
+            uvdict[k] = uv
+            matches[k] = sc.approx(g[k], uv)
+            print(f'{k}: g={g[k]}, u={u[k]}, match={matches[k]}')
+        for k in ui_keys:
+            uv = uvdict[k]
+            if not matches[k]: # Avoid floating point errors
+                print(f'Mismatch for {k}: {g[k]} ≠ {uv}')
+                g[k] = uv # Always set the current key to the current value
+                if k in ['nt', 'ntt']:
+                    g.nt = uv
+                    g.ntt = uv
+                    reconcile_fracs('ne', 'na')
+                    if k == 'ntt':
+                        check_sliders()
+                else:
+                    reconcile_fracs(k)
+                if input.autoupdate(): # Only handle one input at a time
+                    break
         
         # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
