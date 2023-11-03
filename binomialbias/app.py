@@ -44,7 +44,7 @@ def make_globaldict():
     return g
 
 # Set the component keys
-show_sliders = False # Whether or not to show the sliders
+show_sliders = True # Whether or not to show the sliders
 if show_sliders:
     slider_keys = ['nt',  'ne', 'na']
     text_keys   = ['ntt', 'fe', 'fa']
@@ -55,13 +55,12 @@ round_keys = ['nt',  'ne', 'na', 'ntt'] # These quantities need to be rounded
 ui_keys = slider_keys + text_keys
 
 # Define the app defaults
-
 nmin = 0 # Minimum slider value
 nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
 width = '50%' # Width of the text entry boxes
-delay = 0.0 # Optionally wait for user to finish input before updating
-debug = False
+delay = 0.1 # Optionally wait for user to finish input before updating
+debug = False # Whether to print out additional debugging information
 
 
 #%% Define the interface
@@ -88,6 +87,7 @@ def make_ui(*args, **kwargs):
     </div>
     '''
     
+    # HTML labels for UI controls
     nt_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
     na_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
     ne_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
@@ -174,6 +174,7 @@ def make_ui(*args, **kwargs):
 
 #%% Define the server
 
+# Instructions
 instr = ui.HTML('''
 This webapp calculates the bias in a selection process, such as
 the number of people of a certain group who are expected to be appointed to a committee,
@@ -240,28 +241,31 @@ def server(input, output, session):
         """ Reconcile the input from the sliders and text boxes """
         sc.heading('Starting to reconcile inputs!')
         u = get_ui()
+        uvdict = sc.objdict()
+        matches = sc.objdict()
         for k in ui_keys:
-            print(f'{k}: g={g[k]}, u={u[k]}')
-        for k in ui_keys:
-            gv = g[k]
             uv = bbm.to_num(u[k])
             if not np.isnan(uv):
                 if k in round_keys:
                     uv = round(uv)
-                match = sc.approx(gv, uv)
-                if not match: # Avoid floating point errors
-                    print(f'Mismatch for {k}: {gv} ≠ {uv}')
-                    g[k] = uv # Always set the current key to the current value
-                    if k in ['nt', 'ntt']:
-                        g.nt = uv
-                        g.ntt = uv
-                        reconcile_fracs('ne', 'na')
-                        if k == 'ntt':
-                            check_sliders()
-                    else:
-                        reconcile_fracs(k)
-                    if input.autoupdate(): # Only handle one input at a time
-                        break
+            uvdict[k] = uv
+            matches[k] = sc.approx(g[k], uv)
+            print(f'{k}: g={g[k]}, u={u[k]}, match={matches[k]}')
+        for k in ui_keys:
+            uv = uvdict[k]
+            if not matches[k]: # Avoid floating point errors
+                print(f'Mismatch for {k}: {g[k]} ≠ {uv}')
+                g[k] = uv # Always set the current key to the current value
+                if k in ['nt', 'ntt']:
+                    g.nt = uv
+                    g.ntt = uv
+                    reconcile_fracs('ne', 'na')
+                    if k == 'ntt':
+                        check_sliders()
+                else:
+                    reconcile_fracs(k)
+                if input.autoupdate(): # Only handle one input at a time
+                    break
         
         # The isolation here avoids a potential infinite loop
         with sh.reactive.isolate():
@@ -276,7 +280,8 @@ def server(input, output, session):
         for k in ui_keys:
             uv = u[k]
             gv = g[k]
-            if uv != gv:
+            match = sc.approx(gv, uv)
+            if not match:
                 print(f'  Updating {k}: {uv} → {gv}')
                 if   k in slider_keys: ui.update_slider(k, value=gv)
                 elif k in text_keys:   ui.update_text(k,   value=gv)
