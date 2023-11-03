@@ -55,13 +55,12 @@ round_keys = ['nt',  'ne', 'na', 'ntt'] # These quantities need to be rounded
 ui_keys = slider_keys + text_keys
 
 # Define the app defaults
-
 nmin = 0 # Minimum slider value
 nmax = 100 # Default maximum slider value
 slider_max = 1_000_000 # Absolute maximum slider value
 width = '50%' # Width of the text entry boxes
 delay = 0.0 # Optionally wait for user to finish input before updating
-debug = False
+debug = False # Whether to print out additional debugging information
 
 
 #%% Define the interface
@@ -88,6 +87,7 @@ def make_ui(*args, **kwargs):
     </div>
     '''
     
+    # HTML labels for UI controls
     nt_str = ui.HTML('Total number of appointments (<i>n<sub>t</sub></i>)')
     na_str = ui.HTML('Actual appointments (<i>n<sub>a</sub></i>)')
     ne_str = ui.HTML('Expected appointments (<i>n<sub>e</sub></i>)')
@@ -174,6 +174,7 @@ def make_ui(*args, **kwargs):
 
 #%% Define the server
 
+# Instructions
 instr = ui.HTML('''
 This webapp calculates the bias in a selection process, such as
 the number of people of a certain group who are expected to be appointed to a committee,
@@ -276,7 +277,8 @@ def server(input, output, session):
         for k in ui_keys:
             uv = u[k]
             gv = g[k]
-            if uv != gv:
+            match = sc.approx(gv, uv)
+            if not match:
                 print(f'  Updating {k}: {uv} → {gv}')
                 if   k in slider_keys: ui.update_slider(k, value=gv)
                 elif k in text_keys:   ui.update_text(k,   value=gv)
