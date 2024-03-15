@@ -71,8 +71,8 @@ def make_ui(*args, **kwargs):
     <div>This webapp calculates bias and discrimination in appointment processes, based 
     on the binomial distribution. It is provided in support of the following paper:<br>
     <br>
-    <b>Quantitative assessment of discrimination in appointments to senior Australian university positions.</b>
-    Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
+    <b>Quantitative measures of discrimination with application to appointment processes.</b>
+    Robinson PA, Kerr CC (2024). <i>PLoS ONE</i> <b>19</b>(3): e0299870. <a href="https://doi.org/10.1371/journal.pone.0299870">https://doi.org/10.1371/journal.pone.0299870</a>
     <br>
     For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>,
     the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or 
