@@ -73,7 +73,7 @@ def make_ui(*args, **kwargs):
     <br>
     <b>Quantitative measures of discrimination with application to appointment processes.</b>
     Robinson PA, Kerr CC (2024). <i>PLoS ONE</i> <b>19</b>(3): e0299870. <a href="https://doi.org/10.1371/journal.pone.0299870">https://doi.org/10.1371/journal.pone.0299870</a>
-    <br>
+    <br><br>
     For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>,
     the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or 
     <a href="mailto:cliff@thekerrlab.com">contact us</a>.<br>
