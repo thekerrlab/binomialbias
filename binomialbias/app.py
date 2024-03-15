@@ -75,7 +75,7 @@ def make_ui(*args, **kwargs):
     Robinson PA, Kerr CC. <i>Under review (2023).</i><br>
     <br>
     For more information, please see the <a href="https://github.com/thekerrlab/binomialbias">GitHub repository</a>,
-    the <a href="http://binomialbiaspaper.sciris.org">paper</a> (TBC), or 
+    the <a href="http://binomialbiaspaper.sciris.org">paper</a>, or 
     <a href="mailto:cliff@thekerrlab.com">contact us</a>.<br>
     <br>
     </div>

@@ -7,7 +7,7 @@ This library computes and plots quantitative assessments of discrimination withi
 
 This code supports the following paper:
 
-**Quantitative assessment of discrimination in appointments to senior Australian university positions.** Robinson PA, Kerr CC. *Under review (2023).*
+**Quantitative measures of discrimination with application to appointment processes.** Robinson PA, Kerr CC (2024). *PLoS ONE* 19(3): e0299870. https://doi.org/10.1371/journal.pone.0299870
 
 There are several ways to use this library, described below.
 
