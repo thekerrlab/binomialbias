@@ -158,8 +158,7 @@ def make_ui(*args, **kwargs):
                     ),
                     ui.div(
                         ui.panel_conditional("input.show_s",
-                            ui.h4('Statistics'),
-                            ui.output_table('stats_table'),
+                            ui.output_ui('stats_table'),
                         ),
                     ),
                     ui.output_text_verbatim('debug_text'), # Hidden unless debug = True above, but needed for reactivity
@@ -192,6 +191,26 @@ the bias against women being selected for this committee is <i>B = 1.86</i>.<br>
 <br>
 Further information and examples are available in the manuscript.<br>
 ''')
+
+# Make statistics table
+def make_stats(hdict):
+    """ Get the HTML for rendering the statistics table """
+    header = '''
+<table class="dataframe table shiny-table w-auto">
+<thead><tr"><th>Parameter</th><th>Value</th></tr></thead>
+<tbody>
+'''
+    footer = '''
+</tbody>
+</table>
+'''
+    body = ''
+    for k,v in hdict.items():
+        body += f'<tr><td> {k} </td><td> {v} </td></tr>\n'
+        
+    tab = ui.HTML(sc.newlinejoin(header, body, footer))
+    return tab
+
 
 def server(input, output, session):
     """ The PyShiny server, which includes all the update logic """
@@ -316,13 +335,14 @@ def server(input, output, session):
         return fig
     
     @output
-    @sh.render.table
+    @sh.render.ui
     @sh.reactive.event(rerender, ignore_none=False)
     def stats_table():
         """ Create a dataframe of the results """
         bb = make_bias()
-        df = bb.to_df(string=True)
-        return df
+        hdict = bb.to_html()
+        html = make_stats(hdict)
+        return html
     
     @output
     @sh.render.text
