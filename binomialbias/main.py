@@ -39,6 +39,30 @@ def to_num(x, die=False):
     return num
 
 
+def html_symbol(x, keep_var=False):
+    """ Append the mathematical symbol in HTML format to the text """
+    mapping = dict(
+        n             = '<i>n<sub>t</sub></i>',
+        expected      = '<i>n<sub>e</sub></i>',
+        actual        = '<i>n<sub>a</sub></i>',
+        f_expected    = '<i>f<sub>e</sub></i>',
+        f_actual      = '<i>f<sub>a</sub></i>',
+        expected_low  = '<i>E<sub>low</sub></i>',
+        expected_high = '<i>E<sub>high</sub></i>',
+        cum_prob      = '<i>P(n&lt;n<sub>a</sub>)</i>',
+        bias          = '<i>B</i>',
+        p_future      = '<i>P<sub>fut</sub></i>',
+    )
+    sym = mapping[x]
+    if sym:
+        if keep_var:
+            return f'{x} ({sym})'
+        else:
+            return sym
+    else:
+        return x
+
+
 class BinomialBias(sc.prettyobj):
     
     def __init__(self, n=20, n_e=10, n_a=7, f_e=None, f_a=None, one_sided=True,
@@ -210,7 +234,15 @@ class BinomialBias(sc.prettyobj):
         if string:
             df['Value'] = df['Value'].apply(lambda x: to_str(x))
         return df
-
+    
+    def to_html(self):
+        """ Convert results dictionary to an HTML-friendly version """
+        out = {}
+        for k,v in self.results.items():
+            new_k = html_symbol(k)
+            new_v = to_str(v)
+            out[new_k] = new_v
+        return out
 
     def plot(self, dist_color='cornflowerblue', cdf_color='darkblue', ci_color='k', letters=True, wrap=False,
              fig=None, barkw=None, figkw=None, layoutkw=None, textkw=None, max_bars=1000, show=True):
