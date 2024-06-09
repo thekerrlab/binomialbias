@@ -42,16 +42,16 @@ def to_num(x, die=False):
 def html_symbol(x, keep_var=False):
     """ Append the mathematical symbol in HTML format to the text """
     mapping = dict(
-        n             = '<i>n<sub>t</sub></i>',
-        expected      = '<i>n<sub>e</sub></i>',
-        actual        = '<i>n<sub>a</sub></i>',
-        f_expected    = '<i>f<sub>e</sub></i>',
-        f_actual      = '<i>f<sub>a</sub></i>',
-        expected_low  = '<i>E<sub>low</sub></i>',
-        expected_high = '<i>E<sub>high</sub></i>',
-        cum_prob      = '<i>P(n&lt;n<sub>a</sub>)</i>',
-        bias          = '<i>B</i>',
-        p_future      = '<i>P<sub>fut</sub></i>',
+        n             = 'Total appointments, <i>n<sub>t</sub></i>',
+        expected      = 'Expected appointments, <i>n<sub>e</sub></i>',
+        actual        = 'Actual appointments, <i>n<sub>a</sub></i>',
+        f_expected    = 'Expected fraction, <i>f<sub>e</sub></i>',
+        f_actual      = 'Actual fraction, <i>f<sub>a</sub></i>',
+        expected_low  = 'Lower bound of expected, <i>E<sub>low</sub></i>',
+        expected_high = 'Upper bound of expected, <i>E<sub>high</sub></i>',
+        cum_prob      = 'Cumulative probability, <i>P(n&lt;n<sub>a</sub>)</i>',
+        bias          = 'Estimated bias, <i>B</i>',
+        p_future      = 'Probability of future fairness, <i>P<sub>fut</sub></i>',
     )
     sym = mapping[x]
     if sym:
